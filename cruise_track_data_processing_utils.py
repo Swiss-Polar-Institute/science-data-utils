@@ -347,15 +347,25 @@ def analyse_course(position_df):
 def get_list_visual_position_errors(error_filename):
     """Get a file containing start and end times of errors and create a dataframe of these."""
 
-    with open(error_filename, 'r') as file:
-        contents = csv.reader(file)
-        next(contents)
+    if not hasattr(get_list_visual_position_errors, "cached"):
+        get_list_visual_position_errors.cached = {}
 
-        visual_position_errors = []
-        for row in contents:
-            visual_position_errors.append(row)
-    #print("List of visual error times: ", visual_position_errors)
-    return visual_position_errors
+    if error_filename not in get_list_visual_position_errors.cached:
+        with open(error_filename, 'r') as file:
+            contents = csv.reader(file)
+            next(contents)
+
+            visual_position_errors = []
+            for row in contents:
+                time_beginning = datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+                time_ending = datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
+
+                visual_position_errors.append((time_beginning, time_ending, row[2]))
+        #print("List of visual error times: ", visual_position_errors)
+
+        get_list_visual_position_errors.cached[error_filename] = visual_position_errors
+
+    return get_list_visual_position_errors.cached[error_filename]
 
 
 def calculate_manual_visual_position_errors(row):
@@ -366,8 +376,8 @@ def calculate_manual_visual_position_errors(row):
     for invalid_time in invalid_times:
         #print("Invalid time: ", invalid_time)
         #print("Invalid start time: ", invalid_time[0])
-        time_beginning = datetime.datetime.strptime(invalid_time[0], "%Y-%m-%d %H:%M:%S")
-        time_ending = datetime.datetime.strptime(invalid_time[1], "%Y-%m-%d %H:%M:%S")
+        time_beginning = invalid_time[0]
+        time_ending = invalid_time[1]
 
         if row['date_time'] >= time_beginning and row['date_time'] <= time_ending:
             return 5
