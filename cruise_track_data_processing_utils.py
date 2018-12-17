@@ -88,8 +88,8 @@ def output_daily_files(dataframe, path, filename):
 
     for day in days.groups:
         output_path = path + filename + "_" + str(day) + '.csv'
+        print("Creating intermediate flagged data file: ", output_path)
         days.get_group(day).to_csv(output_path, index=False)
-
 
 
 def get_location(datetime, position_df):
@@ -181,6 +181,7 @@ def set_utc(date_time):
 def analyse_speed(position_df):
     """Analyse the cruise track to ensure each point lies within a reasonable distance and direction from the previous point."""
 
+    print("Analysing speed of track")
     total_data_points = len(position_df)
 
     earliest_date_time = position_df['date_time'].min()
@@ -261,6 +262,7 @@ def calculate_bearing_difference(current_bearing, previous_bearing):
 def analyse_course(position_df):
     """Analyse the change in the course between two points regarding the bearing and acceleration - these features need information from previous points."""
 
+    print("Analysing course of track")
     total_data_points = len(position_df)
 
     earliest_date_time = position_df['date_time'].min()
