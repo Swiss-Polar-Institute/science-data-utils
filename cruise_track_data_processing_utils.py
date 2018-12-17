@@ -428,7 +428,7 @@ def combine_position_dataframes(dataframe1, dataframe2):
 
 def remove_intermediate_columns(dataframe):
 
-    combined_dataframe_dropped_cols = dataframe.drop(columns = ['measureland_qualifier_flag_speed', 'measureland_qualifier_flag_course', 'measureland_qualifier_flag_acceleration'])
+    combined_dataframe_dropped_cols = dataframe.drop(columns = ['measureland_qualifier_flag_speed', 'measureland_qualifier_flag_course', 'measureland_qualifier_flag_acceleration', 'measureland_qualifier_flag_visual'])
 
     print("Dimensions of combined dataframe after dropping columns:", combined_dataframe_dropped_cols.shape)
     print("Combined dataframe after dropping columns: ", combined_dataframe_dropped_cols.sample(10))
