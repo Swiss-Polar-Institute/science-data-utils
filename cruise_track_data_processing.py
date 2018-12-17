@@ -83,23 +83,33 @@ def process_track_data(input_filepath, input_filename, device_id, output_create_
     return track_df
 
 
+def process_combined_track_data(dataframe1, dataframe2):
+
+    # Combine the two dataframes of track data, into one dataframe.
+    track_df = cruise_track_data_processing_utils.combine_position_dataframes(dataframe1, dataframe2)
+
+    # Remove the intermediate flagging columns.
+    track_df_overall_flags = cruise_track_data_processing_utils.remove_intermediate_columns(track_df)
+
+    print("Columns of combined dataframe without intermediate flags: ", track_df_overall_flags.dtypes)
+
 def main():
     """Run the processing for the different tracking instruments."""
 
-    # print("****PROCESSING TRIMBLE GPS DATA ****")
-    #
-    # input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # input_filename_trimble_gps = 'ace_trimble_gps'
-    #
-    # device_id_trimble_gps=63
-    #
-    # output_create_files_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # output_create_files_filename_trimble_gps = 'ace_trimble_gps'
-    #
-    # output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
-    #
-    # trimble_df = process_track_data(input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps, output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    print("****PROCESSING TRIMBLE GPS DATA ****")
+
+    input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    input_filename_trimble_gps = 'ace_trimble_gps'
+
+    device_id_trimble_gps=63
+
+    output_create_files_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    output_create_files_filename_trimble_gps = 'ace_trimble_gps'
+
+    output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
+
+    trimble_df = process_track_data(input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps, output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     print("****PROCESSING GLONASS DATA ****")
 
@@ -118,6 +128,7 @@ def main():
                                     output_create_files_filepath_glonass, output_create_files_filename_glonass,
                                     output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
+    process_combined_track_data(trimble_df, glonass_df)
 
 if __name__ == "__main__":
     main()

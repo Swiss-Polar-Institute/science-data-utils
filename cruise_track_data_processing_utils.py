@@ -24,7 +24,7 @@ def get_data_from_files(path, filename):
 
     else:
         data_files = []
-    print(data_files)
+    #print(data_files)
     return data_files
 
 
@@ -32,6 +32,8 @@ def get_data_from_database(query, db_connection):
     """Get data from the MySQL database."""
 
     dataframe = pandas.read_sql(query, con=db_connection)
+    print("Data from database: ", dataframe.head(5))
+    print("Size of dataframe from database: ", dataframe.shape)
 
     return dataframe
 
@@ -71,12 +73,15 @@ def get_data_from_file_list(file_list, header):
                 else:
                     print("Line ", row_number, "has an incorrect number of variables. ", file, " ", line)
             row_number += 1
+    print("This set of files contains ", len(rows_of_data), "rows of data.")
 
     print("Before pandas.DataFrame")
     t1 = time.time()
     df = pandas.DataFrame(rows_of_data, columns=header)
     print("After pandas.DataFrame, it took:", time.time() - t1, "seconds")
     # df.infer_objects().dtypes
+
+    print("Size of dataframe from list of files: ", df.shape)
 
     return df
 
@@ -85,6 +90,7 @@ def output_daily_files(dataframe, path, filename):
     """Create csv files from the data as it is grouped by day."""
 
     days = dataframe.groupby('date_time_day')
+    dataframe.groupby('date_time_day').size().reset_index(name='data points per day')
 
     for day in days.groups:
         output_path = path + filename + "_" + str(day) + '.csv'
@@ -425,7 +431,7 @@ def remove_intermediate_columns(dataframe):
     combined_dataframe_dropped_cols = dataframe.drop(columns = ['measureland_qualifier_flag_speed', 'measureland_qualifier_flag_course', 'measureland_qualifier_flag_acceleration'])
 
     print("Dimensions of combined dataframe after dropping columns:", combined_dataframe_dropped_cols.shape)
-    print("Combined dataframe after dropping columns: ", combined_dataframe_dropped_cols)
+    print("Combined dataframe after dropping columns: ", combined_dataframe_dropped_cols.sample(10))
 
     return combined_dataframe_dropped_cols
 
@@ -440,7 +446,7 @@ def calculate_number_records_flagged_speed(dataframe):
     instrument_speed
 
 
-def alternate_method(dataframe):
+def alternate_method_stats(dataframe):
 
     pandas.pivot_table(dataframe, 'device_id', 'measureland_qualifier_flag_speed')
     course_table = pandas.pivot_table(dataframe, 'device_id', 'measureland_qualifier_flag_course')
