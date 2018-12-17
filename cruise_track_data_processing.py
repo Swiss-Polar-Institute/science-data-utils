@@ -16,7 +16,7 @@ def process_track_data(input_filepath, input_filename, device_id, output_create_
     #header = cruise_track_data_processing_utils.create_header_from_file(file_list)
     #print("Header: ", header)
 
-    file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-19.csv']
+    file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-19.csv']
     header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
 
     # If they do exist, create a list of files and read these files into a dataframe.

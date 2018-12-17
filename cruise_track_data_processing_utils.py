@@ -436,6 +436,23 @@ def remove_intermediate_columns(dataframe):
     return combined_dataframe_dropped_cols
 
 
+def prioritise_data_points(dataframe):
+    """Prioritise the data points within the data frame, depending on the time of the points."""
+
+    dataframe['date_time'] = pandas.to_datetime(dataframe['date_time'])
+
+    # create a column which contains times in the format shown (to avoid both sources of data having a different format)
+    dataframe['date_time_secs'] = dataframe['date_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+    dataframe['date_time_secs'] = pandas.to_datetime(dataframe['date_time_secs'])
+
+    # sort the data frame on the date and time
+    dataframe_secs_sorted = dataframe.sort_values(dataframe['date_time_secs'])
+
+    
+
+####STATS#####
+
 def calculate_number_records_flagged_speed(dataframe):
 
     instrument_speed = pandas.crosstab(index = dataframe['measureland_qualifier_flag_speed'], columns = dataframe['device_id'], margins=True)
