@@ -392,18 +392,21 @@ def calculate_manual_visual_position_errors(row):
 
     return 2
 
-def update_visual_position(dataframe, invalid_position_filepath):
+
+def update_visual_position_flag(dataframe, invalid_position_filepath):
+    """Flag a data point as being bad data if it lies within the periods defined as being so, visually."""
 
     invalid_times = get_list_visual_position_errors(invalid_position_filepath)
 
+    # Assume the data point is good unless it has been flaged visually.
     dataframe['measureland_qualifier_flag_visual'] = '2'
 
+    # Where the data point is recognised as being bad visually, flag it as bad data.
     for invalid_time in invalid_times:
         mask = (dataframe['date_time'] >= invalid_time[0]) & (dataframe['date_time'] <= invalid_time[1])
         dataframe.loc[mask, 'measureland_qualifier_flag_visual'] = 5
 
     return dataframe
-
 
 
 def calculate_measureland_qualifier_flag_overall(row):
@@ -417,12 +420,8 @@ def calculate_measureland_qualifier_flag_overall(row):
         return 2
 
 
-
-    # PLOT flags
-    # PLOT stats of how many data points have been flagged
-
-
 def combine_position_dataframes(dataframe1, dataframe2):
+    """Bring together the dataframes from different instrument sources to combine the tracks."""
 
     print("Dimensions of dataframe1: ", dataframe1.shape)
     print("Dimensions of dataframe2: ", dataframe2.shape)
@@ -432,14 +431,15 @@ def combine_position_dataframes(dataframe1, dataframe2):
     combined_dataframe = pandas.concat(frames)
 
     print("Dimensions of combined dataframe: ", combined_dataframe.shape)
-    #combined_dataframe_sorted = combined_dataframe.sort('date_time')
+    combined_dataframe_sorted = combined_dataframe.sort_values('date_time')
 
-    print("Sample of combined dataframe: ", combined_dataframe.sample(10))
+    print("Sample of combined dataframe: ", combined_dataframe_sorted.sample(10))
 
-    return combined_dataframe
+    return combined_dataframe_sorted
 
 
 def remove_intermediate_columns(dataframe):
+    """Remove the intermediate step qualifier flag columns that are not required in the final output data set."""
 
     combined_dataframe_dropped_cols = dataframe.drop(columns = ['measureland_qualifier_flag_speed', 'measureland_qualifier_flag_course', 'measureland_qualifier_flag_acceleration', 'measureland_qualifier_flag_visual'])
 
@@ -448,30 +448,36 @@ def remove_intermediate_columns(dataframe):
 
     return combined_dataframe_dropped_cols
 
-
-def prioritise_data_points(dataframe):
-    """Prioritise the data points within the data frame, depending on the time of the points."""
-
-    dataframe['date_time'] = pandas.to_datetime(dataframe['date_time'])
-
-    # create a column which contains times in the format shown (to avoid both sources of data having a different format)
-    dataframe['date_time_secs'] = dataframe['date_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
-
-    dataframe['date_time_secs'] = pandas.to_datetime(dataframe['date_time_secs'])
-
-    # sort the data frame on the date and time
-    dataframe_secs_sorted = dataframe.sort_values(dataframe['date_time_secs'])
+#
+# def prioritise_data_points(dataframe):
+#     """Prioritise the data points within the data frame, depending on the time of the points."""
+#
+#     dataframe['date_time'] = pandas.to_datetime(dataframe['date_time'])
+#
+#     # create a column which contains times in the format shown (to avoid both sources of data having a different format)
+#     dataframe['date_time_secs'] = dataframe['date_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
+#
+#     dataframe['date_time_secs'] = pandas.to_datetime(dataframe['date_time_secs'])
+#
+#     # sort the data frame on the date and time
+#     dataframe_secs_sorted = dataframe.sort_values(dataframe['date_time_secs'])
 
 
 def choose_rows(rows):
+    """Choose rows from the dataframe according to values in one of the columns."""
+
+    # Ensure that the object is not empty.
     assert(len(rows) > 0)
 
+    # If there is only one row and it has been marked as good data, then select it.
     if len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2:
         return rows[0]
 
+    # If there is only one row (but it is not good) do not select it.
     elif len(rows) == 1:
         return None
 
+    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble).
     elif rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
         return rows[0]
 
@@ -486,7 +492,10 @@ def choose_rows(rows):
 
     return None
 
-def removing_unwanted_data_points(dataframe):
+
+def prioritise_data_points(dataframe):
+    """Create a new dataframe from the prioritised points according to the conditions required. Rows are chosen from small groups which occur at the same time (to seconds)."""
+
     dataframe = dataframe.sort_values(['date_time'])
 
     last_processed_datetime_secs = None
@@ -503,7 +512,7 @@ def removing_unwanted_data_points(dataframe):
         progress_count += 1
 
         if progress_count == 500:
-            print("processing:", row_datetime_secs)
+            print("Prioritising data points. Processing:", row_datetime_secs)
             progress_count = 0
 
         if row_datetime_secs != last_processed_datetime_secs and last_processed_datetime_secs is not None:
@@ -516,8 +525,6 @@ def removing_unwanted_data_points(dataframe):
 
         rows_pending_decision.append(row)
 
-
-
         # if row_datetime_secs == last_processed_datetime_secs or last_processed_datetime_secs is None:
         #     rows_pending_decision.append(row)
         # else:
@@ -528,6 +535,10 @@ def removing_unwanted_data_points(dataframe):
         last_processed_datetime_secs = row_datetime_secs
 
     result_dataframe = pandas.DataFrame(list_of_rows)
+
+    print("Chosen data points: ", result_dataframe.shape)
+    print("Chosen data points: ", result_dataframe.sample(50))
+
     return result_dataframe
 
 ####STATS#####

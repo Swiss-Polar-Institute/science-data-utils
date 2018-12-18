@@ -8,6 +8,7 @@ import os
 import pandas
 
 def process_track_data(input_filepath, input_filename, file_list, header, device_id, output_create_files_filepath, output_create_files_filename, output_flagging_filepath, output_flagging_filename):
+    """Process track data from some input. Output data as a pandas dataframe and perform some quality assurance and quality checking of the data points."""
 
     # Check if the data files exist or not.
     #file_list = cruise_track_data_processing_utils.get_data_from_files(input_filepath, input_filename)
@@ -73,7 +74,7 @@ def process_track_data(input_filepath, input_filename, file_list, header, device
     #track_df['measureland_qualifier_flag_visual'] = track_df.apply(cruise_track_data_processing_utils.calculate_manual_visual_position_errors, axis=1)
 
     invalid_position_filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
-    track_df = cruise_track_data_processing_utils.update_visual_position(track_df, invalid_position_filepath)
+    track_df = cruise_track_data_processing_utils.update_visual_position_flag(track_df, invalid_position_filepath)
 
     # Calculate an overall quality flag, taking into account all of the factors tested above.
     print("Computing overall measureland qualifier flags")
@@ -88,6 +89,7 @@ def process_track_data(input_filepath, input_filename, file_list, header, device
 
 
 def process_combined_track_data(dataframe1, dataframe2):
+    """Combine the track data sets and prioritise data point selection."""
 
     # Combine the two dataframes of track data, into one dataframe.
     track_df = cruise_track_data_processing_utils.combine_position_dataframes(dataframe1, dataframe2)
@@ -97,10 +99,10 @@ def process_combined_track_data(dataframe1, dataframe2):
 
     print("Columns of combined dataframe without intermediate flags: ", track_df_overall_flags.dtypes)
 
-    resulting_prioritied_df = cruise_track_data_processing_utils.removing_unwanted_data_points(track_df_overall_flags)
+    resulting_prioritised_df = cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags)
 
-    print(resulting_prioritied_df.head(30))
-    resulting_prioritied_df.to_csv('/tmp/test.csv')
+    resulting_prioritised_df.to_csv('/tmp/test.csv')
+
 
 def main():
     """Run the processing for the different tracking instruments."""
@@ -147,8 +149,9 @@ def main():
                                     output_create_files_filepath_glonass, output_create_files_filename_glonass,
                                     output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
-    process_combined_track_data(trimble_df, glonass_df)
+    print("*****COMBINING TRACK DATA SETS*****")
 
+    process_combined_track_data(trimble_df, glonass_df)
 
 
 if __name__ == "__main__":
