@@ -7,7 +7,7 @@ import numpy as np
 import os
 import pandas
 
-def process_track_data(input_filepath, input_filename, file_list, header, device_id, output_create_files_filepath, output_create_files_filename, output_flagging_filepath, output_flagging_filename):
+def process_track_data(input_filepath, input_filename, file_list, header, device_id, output_create_files_filepath, output_create_files_filename, invalid_position_filepath, output_flagging_filepath, output_flagging_filename):
     """Process track data from some input. Output data as a pandas dataframe and perform some quality assurance and quality checking of the data points."""
 
     # Check if the data files exist or not.
@@ -73,7 +73,6 @@ def process_track_data(input_filepath, input_filename, file_list, header, device
     #print("Comparing visual position errors")
     #track_df['measureland_qualifier_flag_visual'] = track_df.apply(cruise_track_data_processing_utils.calculate_manual_visual_position_errors, axis=1)
 
-    invalid_position_filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
     track_df = cruise_track_data_processing_utils.update_visual_position_flag(track_df, invalid_position_filepath)
 
     # Calculate an overall quality flag, taking into account all of the factors tested above.
@@ -122,10 +121,14 @@ def main():
     output_create_files_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_create_files_filename_trimble_gps = 'ace_trimble_gps'
 
+    invalid_position_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
+
     output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
 
-    trimble_df = process_track_data(input_filepath_trimble_gps, input_filename_trimble_gps, file_list, header, device_id_trimble_gps, output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    trimble_df = process_track_data(input_filepath_trimble_gps, input_filename_trimble_gps, file_list, header, device_id_trimble_gps,
+                                    output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                    output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     print("****PROCESSING GLONASS DATA ****")
 
@@ -142,11 +145,13 @@ def main():
     output_create_files_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_create_files_filename_glonass = 'ace_glonass'
 
+    invalid_position_filepath_glonass = ''
+
     output_flagging_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_flagging_filename_glonass = 'flagging_data_ace_glonass'
 
     glonass_df = process_track_data(input_filepath_glonass, input_filename_glonass, file_list, header, device_id_glonass,
-                                    output_create_files_filepath_glonass, output_create_files_filename_glonass,
+                                    output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
                                     output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
     print("*****COMBINING TRACK DATA SETS*****")

@@ -376,21 +376,21 @@ def get_list_visual_position_errors(error_filename):
     return get_list_visual_position_errors.cached[error_filename]
 
 
-def calculate_manual_visual_position_errors(row):
-    """Get the list of periods when the track is visually incorrect (manual checking) and flag all of the GPS datapoints that lie in these periods as being bad data."""
-
-    invalid_times = get_list_visual_position_errors('/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv')
-
-    for invalid_time in invalid_times:
-        #print("Invalid time: ", invalid_time)
-        #print("Invalid start time: ", invalid_time[0])
-        time_beginning = invalid_time[0]
-        time_ending = invalid_time[1]
-
-        if row['date_time'] >= time_beginning and row['date_time'] <= time_ending:
-            return 5
-
-    return 2
+# def calculate_manual_visual_position_errors(row):
+#     """Get the list of periods when the track is visually incorrect (manual checking) and flag all of the GPS datapoints that lie in these periods as being bad data."""
+#
+#     invalid_times = get_list_visual_position_errors('/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv')
+#
+#     for invalid_time in invalid_times:
+#         #print("Invalid time: ", invalid_time)
+#         #print("Invalid start time: ", invalid_time[0])
+#         time_beginning = invalid_time[0]
+#         time_ending = invalid_time[1]
+#
+#         if row['date_time'] >= time_beginning and row['date_time'] <= time_ending:
+#             return 5
+#
+#     return 2
 
 
 def update_visual_position_flag(dataframe, invalid_position_filepath):
@@ -484,11 +484,17 @@ def choose_rows(rows):
     elif rows[1]['device_id'] == 64 and rows[1]['measureland_qualifier_flag_overall'] == 2:
         return rows[1]
 
+    elif rows[2]['device_id'] == 64 and rows[2]['measureland_qualifier_flag_overall'] == 2:
+        return rows[2]
+
     elif rows[0]['device_id'] == 63 and rows[0]['measureland_qualifier_flag_overall'] == 2:
         return rows[0]
 
     elif rows[1]['device_id'] == 63 and rows[1]['measureland_qualifier_flag_overall'] == 2:
         return rows[1]
+
+    elif rows[2]['device_id'] == 63 and rows[2]['measureland_qualifier_flag_overall'] == 2:
+        return rows[2]
 
     return None
 
