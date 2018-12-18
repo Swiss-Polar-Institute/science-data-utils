@@ -7,7 +7,7 @@ import numpy as np
 import os
 import pandas
 
-def process_track_data(input_filepath, input_filename, device_id, output_create_files_filepath, output_create_files_filename, output_flagging_filepath, output_flagging_filename):
+def process_track_data(input_filepath, input_filename, file_list, header, device_id, output_create_files_filepath, output_create_files_filename, output_flagging_filepath, output_flagging_filename):
 
     # Check if the data files exist or not.
     #file_list = cruise_track_data_processing_utils.get_data_from_files(input_filepath, input_filename)
@@ -16,8 +16,9 @@ def process_track_data(input_filepath, input_filename, device_id, output_create_
     #header = cruise_track_data_processing_utils.create_header_from_file(file_list)
     #print("Header: ", header)
 
-    file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-19.csv']
-    header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
+    if input_filename == '' or input_filename =='':
+        file_list = file_list
+        header = header
 
     # If they do exist, create a list of files and read these files into a dataframe.
     if len(file_list) > 0:
@@ -68,8 +69,11 @@ def process_track_data(input_filepath, input_filename, device_id, output_create_
     print(track_df.dtypes)
 
     # Flag the points where the track has been manually and visually identified as incorrect.
-    print("Comparing visual position errors")
-    track_df['measureland_qualifier_flag_visual'] = track_df.apply(cruise_track_data_processing_utils.calculate_manual_visual_position_errors, axis=1)
+    #print("Comparing visual position errors")
+    #track_df['measureland_qualifier_flag_visual'] = track_df.apply(cruise_track_data_processing_utils.calculate_manual_visual_position_errors, axis=1)
+
+    invalid_position_filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
+    track_df = cruise_track_data_processing_utils.update_visual_position(track_df, invalid_position_filepath)
 
     # Calculate an overall quality flag, taking into account all of the factors tested above.
     print("Computing overall measureland qualifier flags")
@@ -93,13 +97,23 @@ def process_combined_track_data(dataframe1, dataframe2):
 
     print("Columns of combined dataframe without intermediate flags: ", track_df_overall_flags.dtypes)
 
+    resulting_prioritied_df = cruise_track_data_processing_utils.removing_unwanted_data_points(track_df_overall_flags)
+
+    print(resulting_prioritied_df.head(30))
+    resulting_prioritied_df.to_csv('/tmp/test.csv')
+
 def main():
     """Run the processing for the different tracking instruments."""
 
     print("****PROCESSING TRIMBLE GPS DATA ****")
 
-    input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    input_filename_trimble_gps = 'ace_trimble_gps'
+    #input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    #input_filename_trimble_gps = 'ace_trimble_gps'
+    input_filepath_trimble_gps = ''
+    input_filename_trimble_gps = ''
+
+    file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-19.csv']
+    header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
 
     device_id_trimble_gps=63
 
@@ -109,12 +123,17 @@ def main():
     output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
 
-    trimble_df = process_track_data(input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps, output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    trimble_df = process_track_data(input_filepath_trimble_gps, input_filename_trimble_gps, file_list, header, device_id_trimble_gps, output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     print("****PROCESSING GLONASS DATA ****")
 
-    input_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    input_filename_glonass = 'ace_glonass'
+    #input_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    #input_filename_glonass = 'ace_glonass'
+    input_filepath_glonass = ''
+    input_filename_glonass = ''
+
+    file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-19.csv']
+    header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
 
     device_id_glonass = 64
 
@@ -124,11 +143,13 @@ def main():
     output_flagging_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_flagging_filename_glonass = 'flagging_data_ace_glonass'
 
-    glonass_df = process_track_data(input_filepath_glonass, input_filename_glonass, device_id_glonass,
+    glonass_df = process_track_data(input_filepath_glonass, input_filename_glonass, file_list, header, device_id_glonass,
                                     output_create_files_filepath_glonass, output_create_files_filename_glonass,
                                     output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
     process_combined_track_data(trimble_df, glonass_df)
+
+
 
 if __name__ == "__main__":
     main()

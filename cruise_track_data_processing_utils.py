@@ -392,6 +392,19 @@ def calculate_manual_visual_position_errors(row):
 
     return 2
 
+def update_visual_position(dataframe, invalid_position_filepath):
+
+    invalid_times = get_list_visual_position_errors(invalid_position_filepath)
+
+    dataframe['measureland_qualifier_flag_visual'] = '2'
+
+    for invalid_time in invalid_times:
+        mask = (dataframe['date_time'] >= invalid_time[0]) & (dataframe['date_time'] <= invalid_time[1])
+        dataframe.loc[mask, 'measureland_qualifier_flag_visual'] = 5
+
+    return dataframe
+
+
 
 def calculate_measureland_qualifier_flag_overall(row):
     """Calculate the overall data quality flag taking into account the others that have been assigned."""
@@ -449,7 +462,73 @@ def prioritise_data_points(dataframe):
     # sort the data frame on the date and time
     dataframe_secs_sorted = dataframe.sort_values(dataframe['date_time_secs'])
 
-    
+
+def choose_rows(rows):
+    assert(len(rows) > 0)
+
+    if len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+        return rows[0]
+
+    elif len(rows) == 1:
+        return None
+
+    elif rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+        return rows[0]
+
+    elif rows[1]['device_id'] == 64 and rows[1]['measureland_qualifier_flag_overall'] == 2:
+        return rows[1]
+
+    elif rows[0]['device_id'] == 63 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+        return rows[0]
+
+    elif rows[1]['device_id'] == 63 and rows[1]['measureland_qualifier_flag_overall'] == 2:
+        return rows[1]
+
+    return None
+
+def removing_unwanted_data_points(dataframe):
+    dataframe = dataframe.sort_values(['date_time'])
+
+    last_processed_datetime_secs = None
+
+    rows_pending_decision = []
+
+    progress_count = 0
+
+    list_of_rows = []
+
+    for row_id, row in dataframe.iterrows():
+        row_datetime_secs = row['date_time'].strftime('%Y-%m-%d %H:%M:%S')
+
+        progress_count += 1
+
+        if progress_count == 500:
+            print("processing:", row_datetime_secs)
+            progress_count = 0
+
+        if row_datetime_secs != last_processed_datetime_secs and last_processed_datetime_secs is not None:
+            selected_row = choose_rows(rows_pending_decision)
+
+            if selected_row is not None:
+                list_of_rows.append(selected_row)
+
+            rows_pending_decision = []
+
+        rows_pending_decision.append(row)
+
+
+
+        # if row_datetime_secs == last_processed_datetime_secs or last_processed_datetime_secs is None:
+        #     rows_pending_decision.append(row)
+        # else:
+        #     result_dataframe.append(choose_rows(rows_pending_decision))
+        #     rows_pending_decision = []
+        #     rows_pending_decision.append(row)
+
+        last_processed_datetime_secs = row_datetime_secs
+
+    result_dataframe = pandas.DataFrame(list_of_rows)
+    return result_dataframe
 
 ####STATS#####
 
