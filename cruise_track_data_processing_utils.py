@@ -6,6 +6,19 @@ import numpy as np
 import os
 import pandas
 import time
+import csvkit
+
+def create_concatenated_csvfile(filepath, filename):
+
+
+    concatenated_filename = filepath + "/" + filename + "_concatenated.csv"
+
+    # Check if the concatenated files exist.
+    if not os.path.isfile(concatenated_filename):
+        os.system('csvstack filepath + "/" filename + "*.csv" > concatenated_filename')
+
+    return concatenated_filename
+
 
 def get_data_from_files(path, filename):
     """Check if the data files exist. If they don't then get the data from the database, otherwise create a list of data files."""
@@ -51,6 +64,49 @@ def create_header_from_file(file_list):
             row_number += 1
 
     return header
+
+
+def get_concatenated_csv_data(concatenated_filepath, concatenated_filename, device_id, output_create_files_filepath, output_create_files_filename):
+    """Create one csv file of all of the data to import."""
+
+    # Create the full file name of the concatenated filename.
+    concatenated_file = concatenated_filepath + "/" + concatenated_filename + "_concatenated.csv"
+    print("Looking for concatenated file name: ", concatenated_file)
+
+    # Test if the concatenated file exists and if it does, return it.
+    if os.path.isfile(concatenated_file):
+        print("Concatenated file exists: ", concatenated_file)
+        return concatenated_file
+
+    # If it does not exist, test if the individual files exist.
+    elif not os.path.isfile(concatenated_file):
+        print("Concatenated file does not exist. Create file.")
+        file_list = get_data_from_files(concatenated_filepath, concatenated_filename)
+        # print("File list:", file_list)
+
+        # If the individual files exist, create the concatenated file.
+        if len(file_list) > 0:
+            print("Individual csv files exist. Creating the concatenated file.")
+            concatenated_file = create_concatenated_csvfile(concatenated_filepath, concatenated_filename)
+            return concatenated_file
+
+        # If the individual files do not exist, get the data from the database, create the files then concatenate them.
+        else:
+            database_query = "select * from ship_data_gpggagpsfix where device_id=" + int(
+                device_id) + " order by date_time;"
+            # print(database_query)
+            password = input()
+
+            db_connection = MySQLdb.connect(host='localhost', user='ace', passwd=password, db='ace2016', port=3306);
+
+            track_df = get_data_from_database(database_query, db_connection)
+            track_df = string_to_datetime(track_df)
+
+            # Output the data into daily files (as they do not already exist).
+            output_daily_files(track_df, output_create_files_filepath, output_create_files_filename)
+
+            concatenated_file = create_concatenated_csvfile(concatenated_filepath, concatenated_filename)
+            return concatenated_file
 
 
 def get_data_from_file_list(file_list, header):
