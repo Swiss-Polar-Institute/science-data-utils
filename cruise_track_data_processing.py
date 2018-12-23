@@ -47,6 +47,7 @@ def process_track_data(input_filepath, input_filename, file_list, header, device
     track_df.replace('', np.nan, inplace=True)
 
     # Convert the data types of the columns from the generic object.
+    track_df['id'] = track_df['id'].astype('int')
     track_df['date_time'] = track_df['date_time'].astype('datetime64[ns]')
     track_df['latitude'] = track_df['latitude'].astype('float64')
     track_df['longitude'] = track_df['longitude'].astype('float64')
