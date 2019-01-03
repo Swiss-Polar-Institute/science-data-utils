@@ -16,6 +16,7 @@ def create_concatenated_csvfile(filepath, filename):
     # Check if the concatenated files exist.
     if not os.path.isfile(concatenated_filename):
         os.system('csvstack filepath + "/" filename + "*.csv" > concatenated_filename')
+        print("Creating concatenated csv file:", concatenated_filename)
 
     return concatenated_filename
 
@@ -80,7 +81,7 @@ def get_concatenated_csv_data(concatenated_filepath, concatenated_filename, devi
 
     # If it does not exist, test if the individual files exist.
     elif not os.path.isfile(concatenated_file):
-        print("Concatenated file does not exist. Create file.")
+        print("Concatenated file does not exist. Create file: ", concatenated_file)
         file_list = get_data_from_files(concatenated_filepath, concatenated_filename)
         # print("File list:", file_list)
 
