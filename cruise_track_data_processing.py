@@ -87,15 +87,15 @@ def process_track_data(concatenated_filepath, concatenated_filename, input_filep
     # pandas.to_datetime(track_df['date_time_day'], format="%Y-%m-%d")
 
     # Check the speed throughout the cruise track to ensure there are not periods where the ship is travelling impossibly fast. Flag data points.
-    cruise_track_data_processing_utils.analyse_speed(track_df)
+    #cruise_track_data_processing_utils.analyse_speed(track_df)
 
     # Check the course of the ship throughout the track to ensure it is not making impossible turns or accelerating impossibly fast. Flag data points.
-    cruise_track_data_processing_utils.analyse_course(track_df)
+    #cruise_track_data_processing_utils.analyse_course(track_df)
 
     print(track_df.dtypes)
 
     # Flag the points where the track has been manually and visually identified as incorrect.
-    #print("Comparing visual position errors")
+    print("Comparing visual position errors")
     #track_df['measureland_qualifier_flag_visual'] = track_df.apply(cruise_track_data_processing_utils.calculate_manual_visual_position_errors, axis=1)
 
     track_df = cruise_track_data_processing_utils.update_visual_position_flag(track_df, invalid_position_filepath)
@@ -154,9 +154,9 @@ def main():
     output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
 
-    trimble_df = process_track_data(concatenated_filepath_trimble, concatenated_filename_trimble, input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                   output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                   output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    #trimble_df = process_track_data(concatenated_filepath_trimble, concatenated_filename_trimble, input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+                            #       output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                            #       output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     print("****PROCESSING GLONASS DATA ****")
 

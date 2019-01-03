@@ -409,14 +409,14 @@ def analyse_course(position_df):
     return (count_bearing_errors, count_acceleration_errors)
 
 
-def get_list_visual_position_errors(error_filename):
+def get_list_visual_position_errors(invalid_position_filename):
     """Get a file containing start and end times of errors and create a dataframe of these."""
 
     if not hasattr(get_list_visual_position_errors, "cached"):
         get_list_visual_position_errors.cached = {}
 
-    if error_filename not in get_list_visual_position_errors.cached:
-        with open(error_filename, 'r') as file:
+    if invalid_position_filename not in get_list_visual_position_errors.cached:
+        with open(invalid_position_filename, 'r') as file:
             contents = csv.reader(file)
             next(contents)
 
@@ -428,9 +428,9 @@ def get_list_visual_position_errors(error_filename):
                 visual_position_errors.append((time_beginning, time_ending, row[2]))
         #print("List of visual error times: ", visual_position_errors)
 
-        get_list_visual_position_errors.cached[error_filename] = visual_position_errors
+        get_list_visual_position_errors.cached[invalid_position_filename] = visual_position_errors
 
-    return get_list_visual_position_errors.cached[error_filename]
+    return get_list_visual_position_errors.cached[invalid_position_filename]
 
 
 # def calculate_manual_visual_position_errors(row):
@@ -453,15 +453,18 @@ def get_list_visual_position_errors(error_filename):
 def update_visual_position_flag(dataframe, invalid_position_filepath):
     """Flag a data point as being bad data if it lies within the periods defined as being so, visually."""
 
-    invalid_times = get_list_visual_position_errors(invalid_position_filepath)
+    if invalid_position_filepath == '':
+        dataframe['measureland_qualifier_flag_visual'] = '2'
+    else:
+        invalid_times = get_list_visual_position_errors(invalid_position_filepath)
 
-    # Assume the data point is good unless it has been flaged visually.
-    dataframe['measureland_qualifier_flag_visual'] = '2'
+        # Assume the data point is good unless it has been flagged visually.
+        dataframe['measureland_qualifier_flag_visual'] = '2'
 
-    # Where the data point is recognised as being bad visually, flag it as bad data.
-    for invalid_time in invalid_times:
-        mask = (dataframe['date_time'] >= invalid_time[0]) & (dataframe['date_time'] <= invalid_time[1])
-        dataframe.loc[mask, 'measureland_qualifier_flag_visual'] = 5
+        # Where the data point is recognised as being bad visually, flag it as bad data.
+        for invalid_time in invalid_times:
+            mask = (dataframe['date_time'] >= invalid_time[0]) & (dataframe['date_time'] <= invalid_time[1])
+            dataframe.loc[mask, 'measureland_qualifier_flag_visual'] = 5
 
     return dataframe
 
