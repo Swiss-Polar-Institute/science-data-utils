@@ -87,12 +87,12 @@ def process_track_data(concatenated_filepath, concatenated_filename, input_filep
     # pandas.to_datetime(track_df['date_time_day'], format="%Y-%m-%d")
 
     # Check the speed throughout the cruise track to ensure there are not periods where the ship is travelling impossibly fast. Flag data points.
-    #cruise_track_data_processing_utils.analyse_speed(track_df)
+    cruise_track_data_processing_utils.analyse_speed(track_df)
 
     # Check the course of the ship throughout the track to ensure it is not making impossible turns or accelerating impossibly fast. Flag data points.
-    #cruise_track_data_processing_utils.analyse_course(track_df)
+    cruise_track_data_processing_utils.analyse_course(track_df)
 
-    print(track_df.dtypes)
+    #print(track_df.dtypes)
 
     # Flag the points where the track has been manually and visually identified as incorrect.
     print("Comparing visual position errors")
@@ -102,9 +102,10 @@ def process_track_data(concatenated_filepath, concatenated_filename, input_filep
 
     # Calculate an overall quality flag, taking into account all of the factors tested above.
     print("Computing overall measureland qualifier flags")
-    track_df['measureland_qualifier_flag_overall'] = track_df.apply(cruise_track_data_processing_utils.calculate_measureland_qualifier_flag_overall, axis=1)
+    #track_df['measureland_qualifier_flag_overall'] = track_df.apply(cruise_track_data_processing_utils.calculate_measureland_qualifier_flag_overall, axis=1)
 
     print("Dataframe with overall quality flag: ", track_df.head(10))
+    print("datetimeday", track_df['date_time_day'])
 
     # Output the data files where they have been flagged to show the intermediate steps and flagging.
     cruise_track_data_processing_utils.output_daily_files(track_df, output_flagging_filepath, output_flagging_filename)
@@ -154,7 +155,7 @@ def main():
     output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
 
-    #trimble_df = process_track_data(concatenated_filepath_trimble, concatenated_filename_trimble, input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+    trimble_df = process_track_data(concatenated_filepath_trimble, concatenated_filename_trimble, input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
                             #       output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
                             #       output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 

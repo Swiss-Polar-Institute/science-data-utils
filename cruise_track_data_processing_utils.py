@@ -150,7 +150,8 @@ def output_daily_files(dataframe, path, filename):
     dataframe.groupby('date_time_day').size().reset_index(name='data points per day')
 
     for day in days.groups:
-        output_path = path + filename + "_" + str(day) + '.csv'
+        print(day.date())
+        output_path = path + filename + "_" + str(day.date()) + '.csv'
         print("Creating intermediate flagged data file: ", output_path)
         days.get_group(day).to_csv(output_path, index=False)
 
@@ -283,8 +284,9 @@ def analyse_speed(position_df):
             position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 2
 
         if error_message != "":
-            print("Error {} Start {} End {}  to position ({:.4f}, {:.4f})   speed: {} knots".format(error_message, previous_position[0], current_position[0],
-                                                                            current_position[1], current_position[2],
+            print("Error {} Start {} ({:.4f}, {:.4f})  End {} ({:.4f}, {:.4f})   speed: {} knots".format(error_message,
+                                    previous_position[0], previous_position[1], previous_position[2],
+                                    current_position[0], current_position[1], current_position[2],
                                                                             speed_knots))
 
         previous_position = current_position
@@ -453,6 +455,7 @@ def get_list_visual_position_errors(invalid_position_filename):
 def update_visual_position_flag(dataframe, invalid_position_filepath):
     """Flag a data point as being bad data if it lies within the periods defined as being so, visually."""
 
+    # Assume the data point is good unless it has been flagged visually.
     if invalid_position_filepath == '':
         dataframe['measureland_qualifier_flag_visual'] = '2'
     else:
