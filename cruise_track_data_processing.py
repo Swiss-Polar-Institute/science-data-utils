@@ -156,8 +156,8 @@ def main():
     output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
 
     trimble_df = process_track_data(concatenated_filepath_trimble, concatenated_filename_trimble, input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                            #       output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                            #       output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+                                   output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                   output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     print("****PROCESSING GLONASS DATA ****")
 
