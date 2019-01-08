@@ -92,10 +92,12 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     cruise_track_data_processing_utils.analyse_speed(track_df)
 
     # Check the course of the ship throughout the track to ensure it is not making impossible turns or accelerating impossibly fast. Flag data points.
-    (count_bearing_errors, count_acceleration_errors) = cruise_track_data_processing_utils.analyse_course(track_df)
-    print("Number of bearing errors: ", count_bearing_errors)
+    (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error) = cruise_track_data_processing_utils.analyse_course(track_df)
+    print("Number of bearing errors when the ship is moving: ", count_bearing_errors)
 
     print("Number of acceleration errors: ", count_acceleration_errors)
+
+    print("Number of bearing errors when the ship is stationary: ", count_ship_stationary_bearing_error)
 
     print(track_df.dtypes)
 
@@ -108,7 +110,7 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     # Calculate an overall quality flag, taking into account all of the factors tested above.
     print("Computing overall measureland qualifier flags")
     track_df['measureland_qualifier_flag_overall'] = track_df.apply(cruise_track_data_processing_utils.calculate_measureland_qualifier_flag_overall, axis=1)
-
+    track_df['measureland_qualifier_flag_overall'] = track_df['measureland_qualifier_flag_overall'].astype('int8')
     print("Dataframe with overall quality flag: ", track_df.head(10))
 
     # Output the data files where they have been flagged to show the intermediate steps and flagging.

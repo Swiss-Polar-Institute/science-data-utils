@@ -344,6 +344,7 @@ def analyse_course(position_df):
 
     count_bearing_errors = 0
     count_acceleration_errors = 0
+    count_ship_stationary_bearing_error = 0 # ship at speed <= 0.3 and bearing tight.
 
     line_number = -1
     for position in position_df.itertuples():
@@ -381,6 +382,10 @@ def analyse_course(position_df):
             error_message_bearing = "** Turn too tight **"
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 5
             count_bearing_errors += 1
+        elif difference_in_bearing >= 5 and current_speed_knots <= 0.3:
+            error_message_bearing = "** Turn tight but ship stationary **"
+            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 3
+            count_ship_stationary_bearing_error += 1
         elif difference_in_bearing < 5:
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2
 
@@ -417,7 +422,7 @@ def analyse_course(position_df):
         previous_bearing = current_bearing
         previous_speed_knots = current_speed_knots
 
-    return (count_bearing_errors, count_acceleration_errors)
+    return (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error)
 
 
 def get_list_visual_position_errors(invalid_position_filename):
@@ -488,6 +493,8 @@ def calculate_measureland_qualifier_flag_overall(row):
         return 5
     elif row['measureland_qualifier_flag_speed'] == 1 and row['measureland_qualifier_flag_course'] == 1 and row['measureland_qualifier_flag_acceleration'] == 1 and row['measureland_qualifier_flag_visual'] == 1:
         return 1
+    elif (row['measureland_qualifier_flag_speed'] == 3 or row['measureland_qualifier_flag_course'] == 3 or row['measureland_qualifier_flag_acceleration'] == 3) and (row['measureland_qualifier_flag_speed'] != 5 or row['measureland_qualifier_flag_course'] != 5 or row['measureland_qualifier_flag_acceleration'] != 5):
+        return 3
     else:
         return 2
 
@@ -549,7 +556,7 @@ def choose_rows(rows):
     elif len(rows) == 1:
         return None
 
-    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble).
+    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality.
     elif rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
         return rows[0]
 
