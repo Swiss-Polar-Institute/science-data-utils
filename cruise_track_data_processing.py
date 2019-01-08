@@ -7,6 +7,7 @@ import numpy as np
 import os
 import pandas
 import cruise_track_data_plotting
+import glob
 
 def process_track_data(dataframe_name, concatenated_filepath, concatenated_filename, input_filepath, input_filename, device_id, output_create_files_filepath, output_create_files_filename, invalid_position_filepath, output_flagging_filepath, output_flagging_filename):
     """Process track data from some input. Output data as a pandas dataframe and perform some quality assurance and quality checking of the data points."""
@@ -127,8 +128,41 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     pivottable_course = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_course')
     pivottable_acceleration = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_acceleration')
 
-
     return track_df
+
+
+def begin_from_intermediate_files(intermediate_filepath, intermediate_filename):
+    """If the intermediate flagged files exist, open these and create a concatenated csv file, to begin the next steps of analysis from here to avoid doing the full set of processing."""
+
+    intermediate_concatenated_file = intermediate_filepath + "/" + intermediate_filename + "_concatenated.csv"
+
+    datatypes = {'id': 'int32',
+              'latitude': 'float64',
+              'longitude': 'float64',
+              'fix_quality': 'int8',
+              'number_satellites': 'int8',
+              'horiz_dilution_of_position': 'float16',
+              'altitude': 'float16',
+              'altitude_units': 'category',
+              'geoid_height': 'float16',
+              'geoid_height_units': 'category',
+              'device_id': 'int8',
+              'measureland_qualifier_flags_id': 'int8',
+              'measureland_qualifier_flag_speed': 'int8',
+              'speed': 'float64',
+              'measureland_qualifier_flag_course': 'int8',
+              'measureland_qualifier_flag_acceleration': 'int8',
+              'measureland_qualifier_flag_visual': 'int8',
+              'measureland_qualifier_flag_overall': 'int8'
+                 }
+
+    if not os.path.isfile(intermediate_concatenated_file):
+        concatenated_filename = cruise_track_data_processing_utils.create_concatenated_csvfile(intermediate_filepath, intermediate_filename)
+        print("Concatenated filename should now have been created: ", concatenated_filename)
+
+    intermediate_dataframe = pandas.read_csv(concatenated_filename, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[1, 13])
+
+    return intermediate_dataframe
 
 
 def process_combined_track_data(dataframe1, dataframe2):
@@ -175,9 +209,23 @@ def main():
 
     dataframe_name = 'trimble'
 
-    #trimble_df = process_track_data(dataframe_name, concatenated_filepath_trimble, concatenated_filename_trimble, input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                  # output_create_files_filepath_trimble_gps, output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                  # output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    intermediate_files = output_flagging_filepath_trimble_gps + "/" + output_flagging_filename_trimble_gps + "*.csv"
+    intermediate_file_list = glob.glob(intermediate_files)
+
+    if len(intermediate_file_list) == 0:
+        print("Intermediate files do not exist. Doing processing from the beginning.")
+        trimble_df = process_track_data(dataframe_name, concatenated_filepath_trimble, concatenated_filename_trimble,
+                                        input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+                                        output_create_files_filepath_trimble_gps,
+                                        output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                        output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    else:
+        print("Intermediate files already exist.")
+
+    trimble_intermediate_df = begin_from_intermediate_files(output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    print("Intermediate data read into dataframe: ", trimble_intermediate_df.head())
+
+
 
     print("****PROCESSING GLONASS DATA ****")
 

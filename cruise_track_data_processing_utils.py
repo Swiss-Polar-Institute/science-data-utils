@@ -15,7 +15,13 @@ def create_concatenated_csvfile(filepath, filename):
 
     # Check if the concatenated files exist.
     if not os.path.isfile(concatenated_filename):
-        os.system('csvstack filepath + "/" + filename + "*.csv" > concatenated_filename')
+        #os.system('csvstack filepath + "/" + filename + "*.csv" > concatenated_filename')
+        #execution = 'csvstack filepath + "/" + filename + "*.csv" > concatenated_filename'
+        execution = "csvstack " + filepath + "/" + filename + "*.csv " + " > " + concatenated_filename
+
+        print("Will execute:", execution)
+        os.system(execution)
+
         print("Creating concatenated csv file:", concatenated_filename)
 
     return concatenated_filename
@@ -65,6 +71,16 @@ def create_header_from_file(file_list):
             row_number += 1
 
     return header
+
+
+def get_data_from_csv(filepath, filename, datatypes):
+    """Get data from a csv file. In the processing this is used for getting data from the concatenated csv file but can be used for any. Write it into a pandas dataframe."""
+
+    concatenated_file = filepath + "/" + filename
+
+    dataframe = pandas.read_csv(concatenated_file, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[1, 19])
+
+    return dataframe
 
 
 def get_concatenated_csv_data(concatenated_filepath, concatenated_filename, device_id, output_create_files_filepath, output_create_files_filename):
