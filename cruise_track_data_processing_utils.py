@@ -15,7 +15,7 @@ def create_concatenated_csvfile(filepath, filename):
 
     # Check if the concatenated files exist.
     if not os.path.isfile(concatenated_filename):
-        os.system('csvstack filepath + "/" filename + "*.csv" > concatenated_filename')
+        os.system('csvstack filepath + "/" + filename + "*.csv" > concatenated_filename')
         print("Creating concatenated csv file:", concatenated_filename)
 
     return concatenated_filename
@@ -275,13 +275,16 @@ def analyse_speed(position_df):
         if speed_knots == "N/A":
             error_message = "No speed?"
             position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 10
+            position_df.at[row_index, 'speed'] = speed_knots
             #print(position_df['id' == row_index])
         elif speed_knots >= 20:
             error_message += "** Too fast **"
             position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 5
+            position_df.at[row_index, 'speed'] = speed_knots
             count_speed_errors += 1
         elif speed_knots < 20:
             position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 2
+            position_df.at[row_index, 'speed'] = speed_knots
 
         if error_message != "":
             print("Error {} Start {} ({:.4f}, {:.4f})  End {} ({:.4f}, {:.4f})   speed: {} knots".format(error_message,
@@ -374,7 +377,7 @@ def analyse_course(position_df):
         if difference_in_bearing == "N/A":
             error_message_bearing = "No bearing?"
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 10
-        elif difference_in_bearing >= 5:
+        elif difference_in_bearing >= 5 and current_speed_knots > 0.3:
             error_message_bearing = "** Turn too tight **"
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 5
             count_bearing_errors += 1
@@ -382,7 +385,13 @@ def analyse_course(position_df):
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2
 
         if error_message_bearing != "":
-            print("Error:  {} Start {} End {} to position ({:.4f}, {:.4f}) bearing change: {} degrees".format(error_message_bearing, previous_position[0],
+            print("Previous: ", previous_position)
+            print("Current: ", current_position)
+            print("Current speed: ", current_speed_knots)
+            print("Error:  {} Start {}  ({:.4f}, {:.4f})   End {} to position ({:.4f}, {:.4f}) bearing change: {} degrees".format(error_message_bearing,
+                                                                                     previous_position[0],
+                                                                                     previous_position[1],
+                                                                                     previous_position[2],
                                                                                      current_position[0],
                                                                                      current_position[1],
                                                                                      current_position[2],
@@ -619,16 +628,17 @@ def calculate_number_records_flagged_speed(dataframe):
     instrument_speed.columns = ['trimble', 'glonass']
     instrument_speed.index = ['2', '5', '10']
 
-    instrument_speed
+    return instrument_speed
 
 
-def alternate_method_stats(dataframe):
+def create_pivottable_on_flag(dataframe_name, dataframe, flag_name):
 
-    pandas.pivot_table(dataframe, 'device_id', 'measureland_qualifier_flag_speed')
-    course_table = pandas.pivot_table(dataframe, 'device_id', 'measureland_qualifier_flag_course')
+    #pivottable = pandas.pivot_table(dataframe, 'device_id', flag_name)
+    pivottable = pandas.pivot_table(dataframe, index= [flag_name], aggfunc = 'count')
 
-    print(course_table)
+    print("Pivot table of qualifier flags from ", dataframe_name, " : ", pivottable)
 
+    return pivottable
 
 
 
