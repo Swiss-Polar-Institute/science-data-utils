@@ -15,8 +15,6 @@ def create_concatenated_csvfile(filepath, filename):
 
     # Check if the concatenated files exist.
     if not os.path.isfile(concatenated_filename):
-        #os.system('csvstack filepath + "/" + filename + "*.csv" > concatenated_filename')
-        #execution = 'csvstack filepath + "/" + filename + "*.csv" > concatenated_filename'
         execution = "csvstack " + filepath + "/" + filename + "*.csv " + " > " + concatenated_filename
 
         print("Will execute:", execution)
@@ -277,11 +275,13 @@ def analyse_speed(position_df):
     line_number = -1
     for position in position_df.itertuples():
         line_number += 1
+        row_index = position[0]
+
         if line_number == 0:
+            position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 1
             continue
 
         current_position = position[2:5]
-        row_index = position[0]
 
         # print(current_position)
         speed_knots = knots_two_points(previous_position, current_position)
@@ -365,11 +365,14 @@ def analyse_course(position_df):
     line_number = -1
     for position in position_df.itertuples():
         line_number += 1
+        row_index = position[0]
+
         if line_number == 0:
+            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1
+            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 1
             continue
 
         current_position = position[2:5]
-        row_index = position[0]
 
         # Calculate bearing and change in bearing
         current_bearing = calculate_bearing(previous_position, current_position)
