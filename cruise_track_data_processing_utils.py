@@ -495,6 +495,8 @@ def get_list_visual_position_errors(invalid_position_filename):
 def update_visual_position_flag(dataframe, invalid_position_filepath):
     """Flag a data point as being bad data if it lies within the periods defined as being so, visually."""
 
+    print("Comparing visual position errors")
+
     # Assume the data point is good unless it has been flagged visually.
     if invalid_position_filepath == '':
         dataframe['measureland_qualifier_flag_visual'] = '2'
@@ -514,6 +516,8 @@ def update_visual_position_flag(dataframe, invalid_position_filepath):
 
 def calculate_measureland_qualifier_flag_overall(row):
     """Calculate the overall data quality flag taking into account the others that have been assigned."""
+
+    print("Computing overall measureland qualifier flags")
 
     if row['measureland_qualifier_flag_speed'] == 5 or row['measureland_qualifier_flag_course'] ==5 or row['measureland_qualifier_flag_acceleration'] ==5 or row['measureland_qualifier_flag_visual'] == 5:
         return 5
