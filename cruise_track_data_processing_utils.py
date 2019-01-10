@@ -310,6 +310,10 @@ def analyse_speed(position_df):
 
         previous_position = current_position
 
+    print(position_df.isnull())
+
+    position_df['measureland_qualifier_flag_speed'] = position_df['measureland_qualifier_flag_speed'].astype(int)
+
     return count_speed_errors
 
 
@@ -440,6 +444,9 @@ def analyse_course(position_df):
         previous_position = current_position
         previous_bearing = current_bearing
         previous_speed_knots = current_speed_knots
+
+    position_df['measureland_qualifier_flag_course'] = position_df['measureland_qualifier_flag_course'].astype(int)
+    position_df['measureland_qualifier_flag_acceleration'] = position_df['measureland_qualifier_flag_acceleration'].astype(int)
 
     return (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error)
 

@@ -160,7 +160,7 @@ def begin_from_intermediate_files(intermediate_filepath, intermediate_filename):
         concatenated_filename = cruise_track_data_processing_utils.create_concatenated_csvfile(intermediate_filepath, intermediate_filename)
         print("Concatenated filename should now have been created: ", concatenated_filename)
 
-    intermediate_dataframe = pandas.read_csv(concatenated_filename, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[1, 13])
+    intermediate_dataframe = pandas.read_csv(intermediate_concatenated_file, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[1, 13])
 
     return intermediate_dataframe
 
@@ -209,10 +209,10 @@ def main():
 
     dataframe_name = 'trimble'
 
-    intermediate_files = output_flagging_filepath_trimble_gps + "/" + output_flagging_filename_trimble_gps + "*.csv"
-    intermediate_file_list = glob.glob(intermediate_files)
+    intermediate_files_trimble = output_flagging_filepath_trimble_gps + "/" + output_flagging_filename_trimble_gps + "*.csv"
+    intermediate_file_list_trimble = glob.glob(intermediate_files_trimble)
 
-    if len(intermediate_file_list) == 0:
+    if len(intermediate_file_list_trimble) == 0:
         print("Intermediate files do not exist. Doing processing from the beginning.")
         trimble_df = process_track_data(dataframe_name, concatenated_filepath_trimble, concatenated_filename_trimble,
                                         input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
@@ -225,7 +225,11 @@ def main():
     trimble_intermediate_df = begin_from_intermediate_files(output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
     print("Intermediate data read into dataframe: ", trimble_intermediate_df.head())
 
-
+    #trimble_df = process_track_data(dataframe_name, concatenated_filepath_trimble, concatenated_filename_trimble,
+                                    # input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+                                    # output_create_files_filepath_trimble_gps,
+                                    # output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                    # output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     print("****PROCESSING GLONASS DATA ****")
 
@@ -252,14 +256,30 @@ def main():
 
     dataframe_name = 'glonass'
 
-    glonass_df = process_track_data(dataframe_name, concatenated_filepath_glonass, concatenated_filename_glonass, input_filepath_glonass, input_filename_glonass, device_id_glonass,
-                                    output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
-                                    output_flagging_filepath_glonass, output_flagging_filename_glonass)
+    intermediate_files_glonass = output_flagging_filepath_glonass + "/" + output_flagging_filename_glonass + "*.csv"
+    intermediate_file_list_glonass = glob.glob(intermediate_files_glonass)
+
+    if len(intermediate_file_list_glonass) == 0:
+        print("Intermediate files do not exist. Doing processing from the beginning.")
+        glonass_df = process_track_data(dataframe_name, concatenated_filepath_glonass, concatenated_filename_glonass, input_filepath_glonass, input_filename_glonass, device_id_glonass,
+                                        output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
+                                        output_flagging_filepath_glonass, output_flagging_filename_glonass)
+    else:
+        print("Intermediate files already exist.")
+
+    glonass_intermediate_df = begin_from_intermediate_files(output_flagging_filepath_glonass, output_flagging_filename_glonass)
+    print("Intermediate data read into dataframe: ", glonass_intermediate_df.head())
+
+    #glonass_df = process_track_data(dataframe_name, concatenated_filepath_glonass, concatenated_filename_glonass, input_filepath_glonass, input_filename_glonass, device_id_glonass,
+                                    # output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
+                                    # output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
     # print("*****COMBINING TRACK DATA SETS*****")
     #
     # process_combined_track_data(trimble_df, glonass_df)
 
+    print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
+    print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
 
 if __name__ == "__main__":
     main()
