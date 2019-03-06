@@ -539,6 +539,12 @@ def combine_position_dataframes(dataframe1, dataframe2):
 
     combined_dataframe = pandas.concat(frames)
 
+    dataframe1.drop(dataframe1.index, inplace=True) # Delete data from dataframe to save memory
+    dataframe2.drop(dataframe2.index, inplace=True) # Delete data from dataframe to save memory
+
+    print("Dimensions of dataframe1: ", dataframe1.shape)
+    print("Dimensions of dataframe2: ", dataframe2.shape)
+
     print("Dimensions of combined dataframe: ", combined_dataframe.shape)
     combined_dataframe_sorted = combined_dataframe.sort_values('date_time')
 
@@ -557,7 +563,7 @@ def remove_intermediate_columns(dataframe):
 
     return combined_dataframe_dropped_cols
 
-#
+# I think this is an old version
 # def prioritise_data_points(dataframe):
 #     """Prioritise the data points within the data frame, depending on the time of the points."""
 #
@@ -577,33 +583,37 @@ def choose_rows(rows):
 
     # Ensure that the object is not empty.
     assert(len(rows) > 0)
-
-    # If there is only one row and it has been marked as good data, then select it.
-    if len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2:
-        return rows[0]
-
-    # If there is only one row (but it is not good) do not select it.
-    elif len(rows) == 1:
-        return None
+    #print("Length of rows:", len(rows))
+    #
+    # # If there is only one row and it has been marked as good data, then select it.
+    # if len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+    #     return rows[0]
+    #
+    # # If there is only one row (but it is not good) do not select it.
+    # elif len(rows) == 1:
+    #     return None
 
     # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality.
-    elif rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+    if len(rows) >= 1 and rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
         return rows[0]
 
-    elif rows[1]['device_id'] == 64 and rows[1]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >=2 and rows[1]['device_id'] == 64 and rows[1]['measureland_qualifier_flag_overall'] == 2:
         return rows[1]
 
-    elif rows[2]['device_id'] == 64 and rows[2]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >= 3 and rows[2]['device_id'] == 64 and rows[2]['measureland_qualifier_flag_overall'] == 2:
         return rows[2]
 
-    elif rows[0]['device_id'] == 63 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >= 1 and rows[0]['device_id'] == 63 and rows[0]['measureland_qualifier_flag_overall'] == 2:
         return rows[0]
 
-    elif rows[1]['device_id'] == 63 and rows[1]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >=2 and rows[1]['device_id'] == 63 and rows[1]['measureland_qualifier_flag_overall'] == 2:
         return rows[1]
 
-    elif rows[2]['device_id'] == 63 and rows[2]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >= 3 and rows[2]['device_id'] == 63 and rows[2]['measureland_qualifier_flag_overall'] == 2:
         return rows[2]
+
+    elif len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 3: # for the first row which has a value of 3, because QC was not able to tell otherwise
+        return rows[0]
 
     return None
 
@@ -611,6 +621,7 @@ def choose_rows(rows):
 def prioritise_data_points(dataframe):
     """Create a new dataframe from the prioritised points according to the conditions required. Rows are chosen from small groups which occur at the same time (to seconds)."""
 
+    "Beginning to prioritise data points"
     dataframe = dataframe.sort_values(['date_time'])
 
     last_processed_datetime_secs = None
@@ -625,12 +636,14 @@ def prioritise_data_points(dataframe):
         row_datetime_secs = row['date_time'].strftime('%Y-%m-%d %H:%M:%S')
 
         progress_count += 1
+        #print(row_id)
 
-        if progress_count == 500:
+        if progress_count == 1000:
             print("Prioritising data points. Processing:", row_datetime_secs)
             progress_count = 0
 
         if row_datetime_secs != last_processed_datetime_secs and last_processed_datetime_secs is not None:
+            #print(rows_pending_decision)
             selected_row = choose_rows(rows_pending_decision)
 
             if selected_row is not None:

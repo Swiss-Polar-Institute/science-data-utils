@@ -122,17 +122,41 @@ def decide_start_of_processing(dataframe_name, concatenated_filepath, concatenat
 def process_combined_track_data(dataframe1, dataframe2):
     """Combine the track data sets and prioritise data point selection."""
 
+    print("*****COMBINING TRACK DATA SETS*****")
+
     # Combine the two dataframes of track data, into one dataframe.
     track_df = cruise_track_data_processing_utils.combine_position_dataframes(dataframe1, dataframe2)
+    print("Combined dataframe: ", track_df.head())
 
-    # Remove the intermediate flagging columns.
+    # test writing to parquet
+    # track_df.to_parquet("test.parquet")
+    #
+    # print("Dataframes remaining", track_df)
+    #
+    # track_df_from_parquet = pandas.read_parquet("test.parquet")
+    # print("Reading back from parquet: ", track_df_from_parquet)
+
+    # if track_df.shape == track_df_from_parquet.shape:
+
+        #track_df.drop(track_df.index, inplace=True)  # Delete data from dataframe to save memory
+
+        # Remove the intermediate flagging columns.
     track_df_overall_flags = cruise_track_data_processing_utils.remove_intermediate_columns(track_df)
-
+    print("Combined dataframe with overall flag: ", track_df_overall_flags.head())
     print("Columns of combined dataframe without intermediate flags: ", track_df_overall_flags.dtypes)
+        #track_df_from_parquet.drop(track_df_from_parquet.index, inplace=True)  # Delete data from dataframe to save memory
+    #else:
+        #print("Reading dataframe to and from parquet has not worked correctly: retest this.")
+        #exit
+    track_df.drop(track_df.index, inplace=True)  # Delete data from dataframe to save memory
+
+    # Write out the combined data set with only the overall qualifier flag to a csv file.
+    track_df_overall_flags.to_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_combined_overall_flags.csv')
 
     resulting_prioritised_df = cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags)
+    track_df_overall_flags.drop(track_df_overall_flags.index, inplace=True)
 
-    resulting_prioritised_df.to_csv('/tmp/test.csv')
+    resulting_prioritised_df.to_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_prioritised.csv')
 
 
 def main():
@@ -213,12 +237,14 @@ def main():
                                     # output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
                                     # output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
-    # print("*****COMBINING TRACK DATA SETS*****")
-    #
-    # process_combined_track_data(trimble_df, glonass_df)
-
     print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
     print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
+
+    # Combine the datasets
+    process_combined_track_data(trimble_intermediate_df, glonass_intermediate_df)
+
+
+
 
 if __name__ == "__main__":
     main()
