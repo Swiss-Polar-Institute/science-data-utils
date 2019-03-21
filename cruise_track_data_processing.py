@@ -1,4 +1,5 @@
 import cruise_track_data_processing_utils
+import cruise_track_data_plotting
 import os
 import pandas
 import glob
@@ -162,87 +163,88 @@ def process_combined_track_data(dataframe1, dataframe2):
 def main():
     """Run the processing for the different tracking instruments."""
 
-    print("****PROCESSING TRIMBLE GPS DATA ****")
+    # print("****PROCESSING TRIMBLE GPS DATA ****")
+    #
+    # concatenated_filepath_trimble = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # concatenated_filename_trimble = 'ace_trimble_gps'
+    #
+    # input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # input_filename_trimble_gps = 'ace_trimble_gps'
+    #
+    # # TESTING USING SUBSET OF FILES.
+    # #input_filepath_trimble_gps = ''
+    # #input_filename_trimble_gps = ''
+    #
+    # # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-19.csv']
+    # # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
+    #
+    # device_id_trimble_gps=63
+    #
+    # output_create_files_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # output_create_files_filename_trimble_gps = 'ace_trimble_gps'
+    #
+    # invalid_position_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
+    #
+    # output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
+    #
+    # dataframe_name_trimble = 'trimble'
+    #
+    # trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
+    #                                      input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+    #                                      output_create_files_filepath_trimble_gps,
+    #                                      output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+    #                                      output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    #
+    # #trimble_df = process_track_data(dataframe_name, concatenated_filepath_trimble, concatenated_filename_trimble,
+    #                                 # input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+    #                                 # output_create_files_filepath_trimble_gps,
+    #                                 # output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+    #                                 # output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    #
+    # print("****PROCESSING GLONASS DATA ****")
+    #
+    # concatenated_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # concatenated_filename_glonass = 'ace_glonass'
+    #
+    # input_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # input_filename_glonass = 'ace_glonass'
+    #
+    # # TESTING USING SUBSET OF FILES.
+    # # input_filepath_glonass = ''
+    # # input_filename_glonass = ''
+    #
+    # # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-19.csv']
+    # # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
+    #
+    # device_id_glonass = 64
+    #
+    # output_create_files_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # output_create_files_filename_glonass = 'ace_glonass'
+    #
+    # invalid_position_filepath_glonass = ''
+    #
+    # output_flagging_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    # output_flagging_filename_glonass = 'flagging_data_ace_glonass'
+    #
+    # dataframe_name_glonass = 'glonass'
+    #
+    # glonass_intermediate_df = decide_start_of_processing(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
+    #                                                      input_filepath_glonass, input_filename_glonass, device_id_glonass,
+    #                                  output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
+    #                                  output_flagging_filepath_glonass, output_flagging_filename_glonass)
+    #
+    # #glonass_df = process_track_data(dataframe_name, concatenated_filepath_glonass, concatenated_filename_glonass, input_filepath_glonass, input_filename_glonass, device_id_glonass,
+    #                                 # output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
+    #                                 # output_flagging_filepath_glonass, output_flagging_filename_glonass)
+    #
+    # print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
+    # print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
+    #
+    # # Combine the datasets
+    # process_combined_track_data(trimble_intermediate_df, glonass_intermediate_df)
 
-    concatenated_filepath_trimble = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    concatenated_filename_trimble = 'ace_trimble_gps'
-
-    input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    input_filename_trimble_gps = 'ace_trimble_gps'
-
-    # TESTING USING SUBSET OF FILES.
-    #input_filepath_trimble_gps = ''
-    #input_filename_trimble_gps = ''
-
-    # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-19.csv']
-    # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
-
-    device_id_trimble_gps=63
-
-    output_create_files_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    output_create_files_filename_trimble_gps = 'ace_trimble_gps'
-
-    invalid_position_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
-
-    output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
-
-    dataframe_name_trimble = 'trimble'
-
-    trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
-                                         input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                         output_create_files_filepath_trimble_gps,
-                                         output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                         output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
-
-    #trimble_df = process_track_data(dataframe_name, concatenated_filepath_trimble, concatenated_filename_trimble,
-                                    # input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                    # output_create_files_filepath_trimble_gps,
-                                    # output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                    # output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
-
-    print("****PROCESSING GLONASS DATA ****")
-
-    concatenated_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    concatenated_filename_glonass = 'ace_glonass'
-
-    input_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    input_filename_glonass = 'ace_glonass'
-
-    # TESTING USING SUBSET OF FILES.
-    # input_filepath_glonass = ''
-    # input_filename_glonass = ''
-
-    # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-19.csv']
-    # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
-
-    device_id_glonass = 64
-
-    output_create_files_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    output_create_files_filename_glonass = 'ace_glonass'
-
-    invalid_position_filepath_glonass = ''
-
-    output_flagging_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    output_flagging_filename_glonass = 'flagging_data_ace_glonass'
-
-    dataframe_name_glonass = 'glonass'
-
-    glonass_intermediate_df = decide_start_of_processing(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
-                                                         input_filepath_glonass, input_filename_glonass, device_id_glonass,
-                                     output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
-                                     output_flagging_filepath_glonass, output_flagging_filename_glonass)
-
-    #glonass_df = process_track_data(dataframe_name, concatenated_filepath_glonass, concatenated_filename_glonass, input_filepath_glonass, input_filename_glonass, device_id_glonass,
-                                    # output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
-                                    # output_flagging_filepath_glonass, output_flagging_filename_glonass)
-
-    print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
-    print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
-
-    # Combine the datasets
-    process_combined_track_data(trimble_intermediate_df, glonass_intermediate_df)
-
+    cruise_track_data_plotting.plot_data_sources()
 
 
 
