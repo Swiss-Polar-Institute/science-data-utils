@@ -6,9 +6,9 @@ def get_data_file(filepath, columns):
     """Get a subset of the data from one file and write into a dataframe"""
 
     #filepath = input("Enter the full path and name of the file")
-    data = pandas.read_csv(filepath, usecols=columns)
+    dataframe = pandas.read_csv(filepath, usecols=columns)
 
-    return data
+    return dataframe
 
 
 def plot_data_sources():
@@ -48,20 +48,23 @@ def plot_data_sources():
     plt.tight_layout()
     plt.show()
 
-    # get flagged data
-    filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/flagging_data_ace_trimble_gps_2017-01-02.csv'
-    columns = ['date_time', 'latitude', 'longitude', 'speed', 'device_id']
-    gps_data_flagged = get_data_file(filepath, columns)
-    print(gps_data_flagged.head(5))
 
-    filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/flagging_data_ace_glonass_2017-01-02.csv'
-    columns = ['date_time', 'latitude', 'longitude', 'speed', 'device_id']
-    glonass_data_flagged = get_data_file(filepath, columns)
-    print(glonass_data_flagged.head(5))
+
+# def get_flagged_glonass_data(filename, columns):
+#     # Get GLONASS data
+#     filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/flagging_data_ace_glonass_2017-01-02.csv'
+#     columns = ['date_time', 'latitude', 'longitude', 'speed', 'device_id']
+#     glonass_data_flagged = get_data_file(filepath, columns)
+#     print(glonass_data_flagged.head(5))
+#
+#     return glonass_data_flagged
+
+
+def plot_speed(dataframe1, colour, legend_label):
+    """Plot the speed of the vessel throughout the cruise to identify outlying speeds."""
 
     # Plot speed data
-    plt.scatter(gps_data_flagged.iloc[::60].longitude, gps_data_flagged.iloc[::60].speed, c='red', label='trimble')
-    plt.scatter(glonass_data_flagged.iloc[::60].longitude, glonass_data_flagged.iloc[::60].speed, c='green', label='glonass')
+    plt.scatter(dataframe1.iloc[::60].longitude, dataframe1.iloc[::60].speed, c=colour, label=legend_label)
     plt.title("Speed of vessel along track")
     plt.xlabel("Longitude")
     plt.ylabel("Speed of vessel, knots")
@@ -72,14 +75,14 @@ def plot_data_sources():
 
     # Plot of frequency distribution of speed of vessel.
     plt.subplot(211)
-    gps_data_flagged['speed'].hist()
+    dataframe1['speed'].hist()
     plt.title("Frequency distribution of speed of vessel")
     plt.xlabel("Speed of vessel, knots")
     plt.ylabel("Count")
     plt.grid(True)
 
     plt.subplot(212)
-    gps_data_flagged['speed'].hist(bins=80,range=[0,20])
+    dataframe1['speed'].hist(bins=80,range=[0,20])
     plt.title("Frequency distribution of speed of vessel")
     plt.xlabel("Speed of vessel, knots")
     plt.ylabel("Count")
@@ -89,13 +92,9 @@ def plot_data_sources():
     plt.show()
 
 
-def plot_overall_combined_track():
-
-    # get combined overall dataset
-    overall = get_data_file()
-
-    # subset the data
-    overall_subset = overall.loc[(overall['longitude'] >= 18.0) & (overall['longitude'] <= 50)]
-
-    # plot the subsetted combined track
-    scatter_plot(overall_subset.longitude, overall_subset.latitude, overall_subset.device_id)
+# filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/flagging_data_ace_trimble_gps_2017-01-02.csv'
+# columns = ['date_time', 'latitude', 'longitude', 'speed', 'device_id']
+# gps_data_flagged = get_data_file(filepath, columns)
+# print(gps_data_flagged.head(5))
+#
+# plot_speed(gps_data_flagged, "red", "trimble")

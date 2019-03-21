@@ -691,6 +691,29 @@ def create_pivottable_on_flag(dataframe_name, dataframe, flag_name):
     return pivottable
 
 
+def get_stats(dataframe, variable):
+    """Get some standard statistics about a variable within a dataframe."""
+
+    print("Maximum value of ", variable, "is: ", dataframe[variable].max(), " in the row ", dataframe[dataframe[variable] == dataframe[variable].max()])
+    print("Minimum value of ", variable, "is: ", dataframe[variable].min(), " in the row ", dataframe[dataframe[variable] == dataframe[variable].min()])
+    print("Mean of ", variable, " is: ", dataframe[variable].mean())
+    print("Standard deviation of ", variable, " is: ", dataframe[variable].std())
+    print("Mode of ", variable, " is: ", dataframe[variable].mode())
+    print("Median of ", variable, " is: ", dataframe[variable].median())
+    q1 = dataframe[variable].quantile(0.25)
+    q3 = dataframe[variable].quantile(0.75)
+    iqr = q3 - q1
+    print("Upper quartile of ", variable, " is: ", q3)
+    print("Lower quartile of ", variable, " is: ", q1)
+    print("Interquartile range of ", variable, " is: ", iqr)
+    print("Lower limit for outliers from IQR for ", variable, " is: ", q1-1.5*iqr)
+    print("Upper limit for outliers from IQR for ", variable, " is: ", q3+1.5*iqr)
+    points_above_upper_limit = len(dataframe.loc[(dataframe['speed'] > (q3+1.5*iqr))])
+    number_of_points = len(dataframe)
+    print("There are ", points_above_upper_limit, " points that lie above the upper bound, which corresponds to ", (points_above_upper_limit/number_of_points)*100, " %")
+
+
+
 
 
 
