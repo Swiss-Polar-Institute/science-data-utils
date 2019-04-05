@@ -205,54 +205,59 @@ def main():
                                      output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     # Get some stats about and plot the speed throughout the cruise
-    # cruise_track_data_processing_utils.get_stats(trimble_intermediate_df, "speed")
-    trimble_intermediate_remove_outlier = trimble_df.loc[(trimble_df['speed'] <= 100) & (trimble_df['speed'] > 2.5)]
-    # cruise_track_data_processing_utils.get_stats(trimble_intermediate_remove_outlier, "speed")
-    cruise_track_data_plotting.plot_speed(trimble_intermediate_remove_outlier, "red", "trimble")
+    # cruise_track_data_processing_utils.get_stats(trimble_df, "speed")
+    trimble_remove_outlier = trimble_df.loc[(trimble_df['speed'] <= 100) & (trimble_df['speed'] > 2.5)]
+    # cruise_track_data_processing_utils.get_stats(trimble_remove_outlier, "speed")
+    cruise_track_data_plotting.plot_speed(trimble_remove_outlier, "red", "trimble")
+
+    print("****PROCESSING GLONASS DATA ****")
+
+    concatenated_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    concatenated_filename_glonass = 'ace_glonass'
+
+    input_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    input_filename_glonass = 'ace_glonass'
+
+    # TESTING USING SUBSET OF FILES.
+    # input_filepath_glonass = ''
+    # input_filename_glonass = ''
     #
-    # print("****PROCESSING GLONASS DATA ****")
+    # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-19.csv']
+    # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
+
+    device_id_glonass = 64
     #
-    # concatenated_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # concatenated_filename_glonass = 'ace_glonass'
-    #
-    # input_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # input_filename_glonass = 'ace_glonass'
-    #
-    # # TESTING USING SUBSET OF FILES.
-    # # input_filepath_glonass = ''
-    # # input_filename_glonass = ''
-    #
-    # # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_glonass_2017-03-19.csv']
-    # # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
-    #
-    # device_id_glonass = 64
-    #
-    # output_create_files_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # output_create_files_filename_glonass = 'ace_glonass'
-    #
-    # invalid_position_filepath_glonass = ''
-    #
-    # output_flagging_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # output_flagging_filename_glonass = 'flagging_data_ace_glonass'
-    #
-    # dataframe_name_glonass = 'glonass'
-    #
+    output_create_files_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    output_create_files_filename_glonass = 'ace_glonass'
+
+    invalid_position_filepath_glonass = ''
+
+    output_flagging_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    output_flagging_filename_glonass = 'flagging_data_ace_glonass'
+
+    dataframe_name_glonass = 'glonass'
+
     # glonass_intermediate_df = decide_start_of_processing(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
     #                                                      input_filepath_glonass, input_filename_glonass, device_id_glonass,
     #                                  output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
     #                                  output_flagging_filepath_glonass, output_flagging_filename_glonass)
-    #
-    # #glonass_df = process_track_data(dataframe_name, concatenated_filepath_glonass, concatenated_filename_glonass, input_filepath_glonass, input_filename_glonass, device_id_glonass,
-    #                                 # output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
-    #                                 # output_flagging_filepath_glonass, output_flagging_filename_glonass)
-    #
+
+    glonass_df = process_track_data(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
+                                  input_filepath_glonass, input_filename_glonass, device_id_glonass,
+                                  output_create_files_filepath_glonass, output_create_files_filename_glonass,
+                                  invalid_position_filepath_glonass, output_flagging_filepath_glonass, output_flagging_filename_glonass)
+
+    # Get some stats about and plot the speed throughout the cruise
+    # cruise_track_data_processing_utils.get_stats(glonass_df, "speed")
+    glonass_remove_outlier = glonass_df.loc[(glonass_df['speed'] <= 100) & (glonass_df['speed'] > 2.5)]
+    # cruise_track_data_processing_utils.get_stats(glonass_remove_outlier, "speed")
+    cruise_track_data_plotting.plot_speed(glonass_remove_outlier, "green", "glonass")
+
     # print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
     # print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
-    #
+
     # # Combine the datasets
     # process_combined_track_data(trimble_intermediate_df, glonass_intermediate_df)
-
-
 
 if __name__ == "__main__":
     main()
