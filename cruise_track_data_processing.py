@@ -29,7 +29,9 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     start_dataframe_length = len(track_df)
 
     # Check the speed throughout the cruise track to ensure there are not periods where the ship is travelling impossibly fast. Flag data points.
-    cruise_track_data_processing_utils.analyse_speed(track_df)
+    track_speed_df = cruise_track_data_processing_utils.calculate_speed(track_df)
+    track_speed_df = cruise_track_data_processing_utils.analyse_speed(track_df)
+    #track_speed_df = cruise_track_data_processing_utils.flag_speed(track_speed_df)
 
     # Check the course of the ship throughout the track to ensure it is not making impossible turns or accelerating impossibly fast. Flag data points.
     (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error) = cruise_track_data_processing_utils.analyse_course(track_df)
@@ -190,22 +192,22 @@ def main():
 
     dataframe_name_trimble = 'trimble'
 
-    trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
-                                         input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                         output_create_files_filepath_trimble_gps,
-                                         output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                         output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    #trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
+                                         # input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+                                         # output_create_files_filepath_trimble_gps,
+                                         # output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                         # output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
-    #trimble_df = process_track_data(dataframe_name, concatenated_filepath_trimble, concatenated_filename_trimble,
-                                    # input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                    # output_create_files_filepath_trimble_gps,
-                                    # output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                    # output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    trimble_df = process_track_data(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
+                                     input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+                                     output_create_files_filepath_trimble_gps,
+                                     output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                     output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     # Get some stats about and plot the speed throughout the cruise
-    cruise_track_data_processing_utils.get_stats(trimble_intermediate_df, "speed")
-    trimble_intermediate_remove_outlier = trimble_intermediate_df.loc[(trimble_intermediate_df['speed'] <= 100) & (trimble_intermediate_df['speed'] > 2.5)]
-    cruise_track_data_processing_utils.get_stats(trimble_intermediate_remove_outlier, "speed")
+    # cruise_track_data_processing_utils.get_stats(trimble_intermediate_df, "speed")
+    trimble_intermediate_remove_outlier = trimble_df.loc[(trimble_df['speed'] <= 100) & (trimble_df['speed'] > 2.5)]
+    # cruise_track_data_processing_utils.get_stats(trimble_intermediate_remove_outlier, "speed")
     cruise_track_data_plotting.plot_speed(trimble_intermediate_remove_outlier, "red", "trimble")
     #
     # print("****PROCESSING GLONASS DATA ****")

@@ -256,21 +256,21 @@ def set_utc(date_time):
     return date_time
 
 
-def analyse_speed(position_df):
-    """Analyse the cruise track to ensure each point lies within a reasonable distance and direction from the previous point."""
+def calculate_speed(position_df):
+    """Calculate the speed between consectutive points and add this as a variable to the dataframe."""
 
-    print("Analysing speed of track")
-    total_data_points = len(position_df)
+    print("Calculating speed of track")
+    #total_data_points = len(position_df)
 
     earliest_date_time = position_df['date_time'].min()
-    latest_date_time = position_df['date_time'].max()
+    #latest_date_time = position_df['date_time'].max()
 
     current_date = earliest_date_time
 
     previous_position = get_location(earliest_date_time, position_df)
-    datetime_previous, latitude_previous, longitude_previous = previous_position
+    #datetime_previous, latitude_previous, longitude_previous = previous_position
 
-    count_speed_errors = 0
+    # count_speed_errors = 0
 
     line_number = -1
     for position in position_df.itertuples():
@@ -285,36 +285,36 @@ def analyse_speed(position_df):
 
         # print(current_position)
         speed_knots = knots_two_points(previous_position, current_position)
-
-        error_message = ""
-
-        if speed_knots == "N/A":
-            error_message = "No speed?"
-            position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 10
-            position_df.at[row_index, 'speed'] = speed_knots
-            #print(position_df['id' == row_index])
-        elif speed_knots >= 20:
-            error_message += "** Too fast **"
-            position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 5
-            position_df.at[row_index, 'speed'] = speed_knots
-            count_speed_errors += 1
-        elif speed_knots < 20:
-            position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 2
-            position_df.at[row_index, 'speed'] = speed_knots
-
-        if error_message != "":
-            print("Error {} Start {} ({:.4f}, {:.4f})  End {} ({:.4f}, {:.4f})   speed: {} knots".format(error_message,
-                                    previous_position[0], previous_position[1], previous_position[2],
-                                    current_position[0], current_position[1], current_position[2],
-                                                                            speed_knots))
+        position_df.at[row_index, 'speed'] = speed_knots
 
         previous_position = current_position
 
     print(position_df.isnull())
 
+    return position_df
+
+
+def analyse_speed(position_df):
+    """Analyse the speed that has been calculated and flag the data points accordingly."""
+
+    print("Analysing speed of track")
+    upper_bound = get_stats(position_df, 'speed')
+    print("Upper bound:", upper_bound)
+
+    # no speed value
+#    position_df.loc[position_df['speed'] == "N/A", 'measureland_qualifier_flag_speed'] = 10
+
+    # speed greater than upper bound
+    position_df.loc[position_df['speed'] > upper_bound, 'measureland_qualifier_flag_speed'] = 5
+
+    # speed within allowed limits (0 <= speed <= upper bound)
+    position_df.loc[position_df['speed'] <= upper_bound, 'measureland_qualifier_flag_speed'] = 2
+
+    print(position_df.isnull())
+
     position_df['measureland_qualifier_flag_speed'] = position_df['measureland_qualifier_flag_speed'].astype(int)
 
-    return count_speed_errors
+    return position_df
 
 
 def calculate_bearing(origin, destination):
@@ -517,7 +517,7 @@ def update_visual_position_flag(dataframe, invalid_position_filepath):
 def calculate_measureland_qualifier_flag_overall(row):
     """Calculate the overall data quality flag taking into account the others that have been assigned."""
 
-    print("Computing overall measureland qualifier flags")
+    #print("Computing overall measureland qualifier flags")
 
     if row['measureland_qualifier_flag_speed'] == 5 or row['measureland_qualifier_flag_course'] ==5 or row['measureland_qualifier_flag_acceleration'] ==5 or row['measureland_qualifier_flag_visual'] == 5:
         return 5
@@ -695,24 +695,29 @@ def get_stats(dataframe, variable):
     """Get some standard statistics about a variable within a dataframe."""
 
     print("Maximum value of ", variable, "is: ", dataframe[variable].max(), " in the row ", dataframe[dataframe[variable] == dataframe[variable].max()])
-    print("Minimum value of ", variable, "is: ", dataframe[variable].min(), " in the row ", dataframe[dataframe[variable] == dataframe[variable].min()])
+    print("Minimum value of ", variable, "is: ", dataframe[variable].min())
     print("Mean of ", variable, " is: ", dataframe[variable].mean())
     print("Standard deviation of ", variable, " is: ", dataframe[variable].std())
     print("Mode of ", variable, " is: ", dataframe[variable].mode())
     print("Median of ", variable, " is: ", dataframe[variable].median())
-    q1 = dataframe[variable].quantile(0.25)
-    q3 = dataframe[variable].quantile(0.75)
+
+    # disregard points that are lower than 2.5 (to avoid stationary periods) as part of the interquartile range and greater than 100, which is only a few points anyway.
+    dataframeselection = dataframe.loc[(dataframe[variable] >= 2.5) & (dataframe[variable] < 100)]
+    q1 = dataframeselection[variable].quantile(0.25)
+    q3 = dataframeselection[variable].quantile(0.75)
     iqr = q3 - q1
     print("Upper quartile of ", variable, " is: ", q3)
     print("Lower quartile of ", variable, " is: ", q1)
     print("Interquartile range of ", variable, " is: ", iqr)
-    print("Lower limit for outliers from IQR for ", variable, " is: ", q1-1.5*iqr)
-    print("Upper limit for outliers from IQR for ", variable, " is: ", q3+1.5*iqr)
-    points_above_upper_limit = len(dataframe.loc[(dataframe['speed'] > (q3+1.5*iqr))])
+    lower_limit = q1-1.5*iqr
+    upper_limit = q3+1.5*iqr
+    print("Lower limit for outliers from IQR for ", variable, " is: ", lower_limit)
+    print("Upper limit for outliers from IQR for ", variable, " is: ", upper_limit)
+    points_above_upper_limit = len(dataframe.loc[(dataframe[variable] > (q3+1.5*iqr)) & (dataframe[variable] < 100)])
     number_of_points = len(dataframe)
     print("There are ", points_above_upper_limit, " points that lie above the upper bound, which corresponds to ", (points_above_upper_limit/number_of_points)*100, " %")
 
-
+    return upper_limit
 
 
 
