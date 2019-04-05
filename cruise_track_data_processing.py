@@ -219,6 +219,8 @@ def main():
     cruise_track_data_processing_utils.get_stats(trimble_intermediate_remove_outlier, "speed")
     cruise_track_data_plotting.plot_speed(trimble_intermediate_remove_outlier, "red", "trimble")
 
+    cruise_track_data_plotting.plot_data_sources_from_dataframe(trimble_intermediate_remove_outlier, 'device_id')
+
     print("****PROCESSING GLONASS DATA ****")
 
     concatenated_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
@@ -256,19 +258,23 @@ def main():
     #                               output_create_files_filepath_glonass, output_create_files_filename_glonass,
     #                               invalid_position_filepath_glonass, output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
-    # Get some stats about and plot the speed throughout the cruise
+    # Get some stats about and plot the speed throughout the cruise (use this version when doing the full processing)
     # cruise_track_data_processing_utils.get_stats(glonass_df, "speed")
     # glonass_remove_outlier = glonass_df.loc[(glonass_df['speed'] <= 100) & (glonass_df['speed'] > 2.5)]
     # cruise_track_data_processing_utils.get_stats(glonass_remove_outlier, "speed")
     #  cruise_track_data_plotting.plot_speed(glonass_remove_outlier, "red", "glonass")
 
+    # Get some stats about and plot the speed throughout the cruise (use this version when doing the intermediate processing)
     cruise_track_data_processing_utils.get_stats(glonass_intermediate_df, "speed")
     glonass_intermediate_remove_outlier = glonass_intermediate_df.loc[(trimble_intermediate_df['speed'] <= 100) & (glonass_intermediate_df['speed'] > 2.5)]
     cruise_track_data_processing_utils.get_stats(glonass_intermediate_remove_outlier, "speed")
     cruise_track_data_plotting.plot_speed(glonass_intermediate_remove_outlier, "red", "glonass")
 
-    # print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
-    # print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
+    cruise_track_data_plotting.plot_data_sources_from_dataframe(glonass_intermediate_remove_outlier, 'device_id')
+
+    # Begin combining the dataframes and datatypes
+    print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
+    print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
 
     # # Combine the datasets
     # process_combined_track_data(trimble_intermediate_df, glonass_intermediate_df)

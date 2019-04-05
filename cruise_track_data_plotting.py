@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import pandas
 import datetime
+#import seaborn as sns
 
 def get_data_file(filepath, columns):
     """Get a subset of the data from one file and write into a dataframe"""
@@ -11,7 +13,7 @@ def get_data_file(filepath, columns):
     return dataframe
 
 
-def plot_data_sources():
+def plot_data_sources_from_file():
 
     # get some data from GPS
     filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_gps_2017-01-02.csv'
@@ -48,6 +50,14 @@ def plot_data_sources():
     plt.tight_layout()
     plt.show()
 
+
+def plot_data_sources_from_dataframe(dataframe, category):
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    ax.scatter(dataframe['longitude'], dataframe['latitude'], alpha=0.70, c=dataframe[category], cmap=cm.brg)
+
+    plt.show()
 
 
 # def get_flagged_glonass_data(filename, columns):
