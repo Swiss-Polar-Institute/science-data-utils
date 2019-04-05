@@ -532,6 +532,7 @@ def calculate_measureland_qualifier_flag_overall(row):
 def combine_position_dataframes(dataframe1, dataframe2):
     """Bring together the dataframes from different instrument sources to combine the tracks."""
 
+    # check that the dataframes have the same number of columns
     print("Dimensions of dataframe1: ", dataframe1.shape)
     print("Dimensions of dataframe2: ", dataframe2.shape)
 
@@ -542,9 +543,11 @@ def combine_position_dataframes(dataframe1, dataframe2):
     dataframe1.drop(dataframe1.index, inplace=True) # Delete data from dataframe to save memory
     dataframe2.drop(dataframe2.index, inplace=True) # Delete data from dataframe to save memory
 
+    # confirm that the dataframes no longer exist (saving memory)
     print("Dimensions of dataframe1: ", dataframe1.shape)
     print("Dimensions of dataframe2: ", dataframe2.shape)
 
+    # check that all rows of both dataframes have been combined into the new dataframe. Sort by date and time.
     print("Dimensions of combined dataframe: ", combined_dataframe.shape)
     combined_dataframe_sorted = combined_dataframe.sort_values('date_time')
 
@@ -621,7 +624,7 @@ def choose_rows(rows):
 def prioritise_data_points(dataframe):
     """Create a new dataframe from the prioritised points according to the conditions required. Rows are chosen from small groups which occur at the same time (to seconds)."""
 
-    "Beginning to prioritise data points"
+    # Beginning to prioritise data points. Firstly ensure that the data are sorted by date and time.
     dataframe = dataframe.sort_values(['date_time'])
 
     last_processed_datetime_secs = None
@@ -638,6 +641,7 @@ def prioritise_data_points(dataframe):
         progress_count += 1
         #print(row_id)
 
+        # do batches of 1000 rows at a time to avoid overloading memory
         if progress_count == 1000:
             print("Prioritising data points. Processing:", row_datetime_secs)
             progress_count = 0
@@ -715,6 +719,7 @@ def get_stats(dataframe, variable):
     print("Upper limit for outliers from IQR for ", variable, " is: ", upper_limit)
     points_above_upper_limit = len(dataframe.loc[(dataframe[variable] > (q3+1.5*iqr)) & (dataframe[variable] < 100)])
     number_of_points = len(dataframe)
+    print("Total number of data points", number_of_points)
     print("There are ", points_above_upper_limit, " points that lie above the upper bound, which corresponds to ", (points_above_upper_limit/number_of_points)*100, " %")
 
     return upper_limit

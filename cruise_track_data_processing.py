@@ -156,9 +156,13 @@ def process_combined_track_data(dataframe1, dataframe2):
     # Write out the combined data set with only the overall qualifier flag to a csv file.
     track_df_overall_flags.to_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_combined_overall_flags.csv')
 
+    # For each second, prioritise the data points according to the source and MQF.
     resulting_prioritised_df = cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags)
+
+    # delete the dataframe to save memory
     track_df_overall_flags.drop(track_df_overall_flags.index, inplace=True)
 
+    # write out the prioritised data to a csv file
     resulting_prioritised_df.to_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_prioritised.csv')
 
 
@@ -192,23 +196,28 @@ def main():
 
     dataframe_name_trimble = 'trimble'
 
-    #trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
-                                         # input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                         # output_create_files_filepath_trimble_gps,
-                                         # output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                         # output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
+                                         input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+                                         output_create_files_filepath_trimble_gps,
+                                         output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                         output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
-    trimble_df = process_track_data(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
-                                     input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-                                     output_create_files_filepath_trimble_gps,
-                                     output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-                                     output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+    # trimble_df = process_track_data(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
+    #                                  input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+    #                                  output_create_files_filepath_trimble_gps,
+    #                                  output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+    #                                  output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
 
     # Get some stats about and plot the speed throughout the cruise
     # cruise_track_data_processing_utils.get_stats(trimble_df, "speed")
-    trimble_remove_outlier = trimble_df.loc[(trimble_df['speed'] <= 100) & (trimble_df['speed'] > 2.5)]
+    # trimble_remove_outlier = trimble_df.loc[(trimble_df['speed'] <= 100) & (trimble_df['speed'] > 2.5)]
     # cruise_track_data_processing_utils.get_stats(trimble_remove_outlier, "speed")
-    cruise_track_data_plotting.plot_speed(trimble_remove_outlier, "red", "trimble")
+    #  cruise_track_data_plotting.plot_speed(trimble_remove_outlier, "red", "trimble")
+
+    cruise_track_data_processing_utils.get_stats(trimble_intermediate_df, "speed")
+    trimble_intermediate_remove_outlier = trimble_intermediate_df.loc[(trimble_intermediate_df['speed'] <= 100) & (trimble_intermediate_df['speed'] > 2.5)]
+    cruise_track_data_processing_utils.get_stats(trimble_intermediate_remove_outlier, "speed")
+    cruise_track_data_plotting.plot_speed(trimble_intermediate_remove_outlier, "red", "trimble")
 
     print("****PROCESSING GLONASS DATA ****")
 
@@ -237,21 +246,26 @@ def main():
 
     dataframe_name_glonass = 'glonass'
 
-    # glonass_intermediate_df = decide_start_of_processing(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
-    #                                                      input_filepath_glonass, input_filename_glonass, device_id_glonass,
-    #                                  output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
-    #                                  output_flagging_filepath_glonass, output_flagging_filename_glonass)
+    glonass_intermediate_df = decide_start_of_processing(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
+                                                         input_filepath_glonass, input_filename_glonass, device_id_glonass,
+                                     output_create_files_filepath_glonass, output_create_files_filename_glonass, invalid_position_filepath_glonass,
+                                     output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
-    glonass_df = process_track_data(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
-                                  input_filepath_glonass, input_filename_glonass, device_id_glonass,
-                                  output_create_files_filepath_glonass, output_create_files_filename_glonass,
-                                  invalid_position_filepath_glonass, output_flagging_filepath_glonass, output_flagging_filename_glonass)
+    # glonass_df = process_track_data(dataframe_name_glonass, concatenated_filepath_glonass, concatenated_filename_glonass,
+    #                               input_filepath_glonass, input_filename_glonass, device_id_glonass,
+    #                               output_create_files_filepath_glonass, output_create_files_filename_glonass,
+    #                               invalid_position_filepath_glonass, output_flagging_filepath_glonass, output_flagging_filename_glonass)
 
     # Get some stats about and plot the speed throughout the cruise
     # cruise_track_data_processing_utils.get_stats(glonass_df, "speed")
-    glonass_remove_outlier = glonass_df.loc[(glonass_df['speed'] <= 100) & (glonass_df['speed'] > 2.5)]
+    # glonass_remove_outlier = glonass_df.loc[(glonass_df['speed'] <= 100) & (glonass_df['speed'] > 2.5)]
     # cruise_track_data_processing_utils.get_stats(glonass_remove_outlier, "speed")
-    cruise_track_data_plotting.plot_speed(glonass_remove_outlier, "green", "glonass")
+    #  cruise_track_data_plotting.plot_speed(glonass_remove_outlier, "red", "glonass")
+
+    cruise_track_data_processing_utils.get_stats(glonass_intermediate_df, "speed")
+    glonass_intermediate_remove_outlier = glonass_intermediate_df.loc[(trimble_intermediate_df['speed'] <= 100) & (glonass_intermediate_df['speed'] > 2.5)]
+    cruise_track_data_processing_utils.get_stats(glonass_intermediate_remove_outlier, "speed")
+    cruise_track_data_plotting.plot_speed(glonass_intermediate_remove_outlier, "red", "glonass")
 
     # print("Trimble data types to check: ", trimble_intermediate_df.dtypes)
     # print("Glonass data types to check: ", glonass_intermediate_df.dtypes)
