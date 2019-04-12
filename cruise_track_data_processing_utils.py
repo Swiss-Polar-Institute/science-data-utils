@@ -734,7 +734,9 @@ def get_device_summary(dataframe):
 
     print("Total number of points: ", len(dataframe))
 
-    
+    print("The number of rows from each device are as follows: ", dataframe.groupby(['device_id']).size())
+
+
 
 
 

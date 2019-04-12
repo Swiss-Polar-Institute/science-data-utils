@@ -304,6 +304,8 @@ def main():
     track_df_overall_flags = pandas.read_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_combined_overall_flags_test.csv', dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[2, 14])
     #print(track_df_overall_flags.head(5))
     #print(track_df_overall_flags.dtypes)
+    cruise_track_data_processing_utils.get_device_summary(track_df_overall_flags)
+    points_before_prioritisation = len(track_df_overall_flags)
 
     # For each second, prioritise the data points according to the source and MQF.
     #resulting_prioritised_df = cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags, output_filepath='/home/jen/projects/ace_data_management/wip/cruise_track_data/', output_filename='ace_cruise_track_prioritised.csv')
@@ -319,11 +321,18 @@ def main():
     filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_cruise_track_prioritised.csv'
     columns = ['date_time', 'latitude', 'longitude', 'device_id']
     gps_data = cruise_track_data_plotting.get_data_file(filepath, columns)
+    points_after_prioritisation = len(gps_data)
+
+    print("Number of data points before prioritisation: ", points_before_prioritisation)
+    print("Number of data points after prioritisation: ", points_after_prioritisation)
 
     # get min and max stats to check data set
     cruise_track_data_processing_utils.get_minmax_stats(gps_data, 'date_time')
     cruise_track_data_processing_utils.get_minmax_stats(gps_data, 'latitude')
     cruise_track_data_processing_utils.get_minmax_stats(gps_data, 'longitude')
+
+    # get device use summary in prioritised dataset
+    cruise_track_data_processing_utils.get_device_summary(gps_data)
 
     # plot the prioritised data
     # Plot one second resolution data
