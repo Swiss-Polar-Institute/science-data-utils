@@ -633,8 +633,6 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
 
     progress_count = 0
 
-    list_of_rows = []
-
     # open output file
     output_file = output_filepath + output_filename
     print("Output selected rows to ", output_file)
@@ -644,7 +642,7 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
 
     writer = csv.writer(f, delimiter=',')
     writer.writerow(['date_time','latitude','longitude','fix_quality','number_satellites','horiz_dilution_of_position','altitude','altitude_units','geoid_height','geoid_height_units','device_id','measureland_qualifier_flags_id','date_time_day','speed','measureland_qualifier_flag_overall'])
-#'','id',
+
     for row_id, row in dataframe.iterrows():
         row_datetime_secs = row['date_time'].strftime('%Y-%m-%d %H:%M:%S')
 

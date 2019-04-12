@@ -338,7 +338,7 @@ def main():
     # plot the prioritised latitude longitude data
     # Plot one second resolution data
     plt.subplot(211)
-    plt.scatter(gps_data.longitude, gps_data.latitude, c="red", label="trimble")
+    plt.scatter(gps_data.longitude, gps_data.latitude, c="red")
     plt.title("One-second resolution")
     plt.xlabel("Longitude, decimal degrees E")
     plt.ylabel("Latitude, decimal degrees N")
@@ -348,15 +348,15 @@ def main():
     # Plot sixty-second resolution latitude longitude data
     sixty_sec_res_gps = gps_data.iloc[::60]
     plt.subplot(212)
-    plt.scatter(sixty_sec_res_gps.longitude, sixty_sec_res_gps.latitude, c="red", label="trimble")
+    plt.scatter(sixty_sec_res_gps.longitude, sixty_sec_res_gps.latitude, c="red")
     plt.title("Sixty-second resolution")
     plt.xlabel("Longitude, decimal degrees E")
     plt.ylabel("Latitude, decimal degrees N")
     plt.grid(True)
     plt.legend()
-
-    plt.tight_layout()
-    plt.show()
+    #
+    # plt.tight_layout()
+    # plt.show()
 
     # Plot position data vs time to see coverage of prioritised data set
     #plt.subplot(211)
