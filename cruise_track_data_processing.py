@@ -5,6 +5,7 @@ import cruise_track_data_plotting
 import os
 import pandas
 import glob
+import datetime
 
 def process_track_data(dataframe_name, concatenated_filepath, concatenated_filename, input_filepath, input_filename, device_id, output_create_files_filepath, output_create_files_filename, invalid_position_filepath, output_flagging_filepath, output_flagging_filename):
     """Process track data from some input. Output data as a pandas dataframe and perform some quality assurance and quality checking of the data points."""
@@ -334,7 +335,7 @@ def main():
     # get device use summary in prioritised dataset
     cruise_track_data_processing_utils.get_device_summary(gps_data)
 
-    # plot the prioritised data
+    # plot the prioritised latitude longitude data
     # Plot one second resolution data
     plt.subplot(211)
     plt.scatter(gps_data.longitude, gps_data.latitude, c="red", label="trimble")
@@ -344,7 +345,7 @@ def main():
     plt.grid(True)
     plt.legend()
 
-    # Plot sixty-second resolution data
+    # Plot sixty-second resolution latitude longitude data
     sixty_sec_res_gps = gps_data.iloc[::60]
     plt.subplot(212)
     plt.scatter(sixty_sec_res_gps.longitude, sixty_sec_res_gps.latitude, c="red", label="trimble")
@@ -356,6 +357,27 @@ def main():
 
     plt.tight_layout()
     plt.show()
+
+    # Plot position data vs time to see coverage of prioritised data set
+    #plt.subplot(211)
+    # plt.scatter(gps_data.date_time, gps_data.latitude)
+    # plt.title("Latitude coverage")
+    # plt.xlabel("Date and time, UTC")
+    # plt.ylabel("Latitude, decimal degrees N")
+    # plt.grid(True)
+    # plt.legend()
+    #
+    # #plt.subplot(211)
+    # plt.scatter(gps_data.date_time, gps_data.longitude)
+    # plt.title("Longitude coverage")
+    # plt.xlabel("Date and time, UTC")
+    # plt.ylabel("Longitude, decimal degrees N")
+    # plt.grid(True)
+    # plt.legend()
+
+    #plt.tight_layout()
+    plt.show()
+
 
 
 if __name__ == "__main__":
