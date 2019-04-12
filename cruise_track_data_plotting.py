@@ -8,7 +8,7 @@ def get_data_file(filepath, columns):
     """Get a subset of the data from one file and write into a dataframe"""
 
     #filepath = input("Enter the full path and name of the file")
-    dataframe = pandas.read_csv(filepath, usecols=columns)
+    dataframe = pandas.read_csv(filepath, usecols=columns, header=0)
 
     return dataframe
 

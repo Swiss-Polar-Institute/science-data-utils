@@ -643,7 +643,8 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
         print("Output file opened")
 
     writer = csv.writer(f, delimiter=',')
-
+    writer.writerow(['date_time','latitude','longitude','fix_quality','number_satellites','horiz_dilution_of_position','altitude','altitude_units','geoid_height','geoid_height_units','device_id','measureland_qualifier_flags_id','date_time_day','speed','measureland_qualifier_flag_overall'])
+#'','id',
     for row_id, row in dataframe.iterrows():
         row_datetime_secs = row['date_time'].strftime('%Y-%m-%d %H:%M:%S')
 
@@ -659,7 +660,7 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
 
             if selected_row is not None:
                 # write the selected row out to the file rather than appending it to the dataframe
-                writer.writerow(selected_row)
+                writer.writerow(selected_row[2:16])
 
             rows_pending_decision = []
 
@@ -667,7 +668,8 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
 
         last_processed_datetime_secs = row_datetime_secs
     f.close()
-
+    if not f:
+        print("Output file closed")
 
 ####STATS#####
 
@@ -720,6 +722,19 @@ def get_stats(dataframe, variable):
 
     return upper_limit
 
+def get_minmax_stats(dataframe, variable):
+    """Get some standard statistics about a variable within a dataframe."""
+
+    print("Maximum value of ", variable, "is: ", dataframe[variable].max())
+    print("Minimum value of ", variable, "is: ", dataframe[variable].min())
+
+
+def get_device_summary(dataframe):
+    """Get number of points from each device in prioritised dataframe"""
+
+    print("Total number of points: ", len(dataframe))
+
+    
 
 
 
