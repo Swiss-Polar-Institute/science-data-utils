@@ -621,7 +621,7 @@ def choose_rows(rows):
     return None
 
 
-def prioritise_data_points(dataframe):
+def prioritise_data_points(dataframe, output_filepath, output_filename):
     """Create a new dataframe from the prioritised points according to the conditions required. Rows are chosen from small groups which occur at the same time (to seconds)."""
 
     # Beginning to prioritise data points. Firstly ensure that the data are sorted by date and time.
@@ -635,11 +635,19 @@ def prioritise_data_points(dataframe):
 
     list_of_rows = []
 
+    # open output file
+    output_file = output_filepath + output_filename
+    print("Output selected rows to ", output_file)
+    f = open(output_file, "a+")
+    if f:
+        print("Output file opened")
+
+    writer = csv.writer(f, delimiter=',')
+
     for row_id, row in dataframe.iterrows():
         row_datetime_secs = row['date_time'].strftime('%Y-%m-%d %H:%M:%S')
 
         progress_count += 1
-        #print(row_id)
 
         # do batches of 1000 rows at a time to avoid overloading memory
         if progress_count == 1000:
@@ -647,31 +655,19 @@ def prioritise_data_points(dataframe):
             progress_count = 0
 
         if row_datetime_secs != last_processed_datetime_secs and last_processed_datetime_secs is not None:
-            #print(rows_pending_decision)
             selected_row = choose_rows(rows_pending_decision)
 
             if selected_row is not None:
-                list_of_rows.append(selected_row)
+                # write the selected row out to the file rather than appending it to the dataframe
+                writer.writerow(selected_row)
 
             rows_pending_decision = []
 
         rows_pending_decision.append(row)
 
-        # if row_datetime_secs == last_processed_datetime_secs or last_processed_datetime_secs is None:
-        #     rows_pending_decision.append(row)
-        # else:
-        #     result_dataframe.append(choose_rows(rows_pending_decision))
-        #     rows_pending_decision = []
-        #     rows_pending_decision.append(row)
-
         last_processed_datetime_secs = row_datetime_secs
+    f.close()
 
-    result_dataframe = pandas.DataFrame(list_of_rows)
-
-    print("Chosen data points: ", result_dataframe.shape)
-    print("Chosen data points: ", result_dataframe.sample(50))
-
-    return result_dataframe
 
 ####STATS#####
 
