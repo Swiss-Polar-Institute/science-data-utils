@@ -596,7 +596,7 @@ def choose_rows(rows):
     # elif len(rows) == 1:
     #     return None
 
-    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality.
+    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality. If the data quality is not good, then do not select, even if there is no other point for that time.
     if len(rows) >= 1 and rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
         return rows[0]
 
@@ -643,6 +643,9 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
     writer = csv.writer(f, delimiter=',')
     writer.writerow(['date_time','latitude','longitude','fix_quality','number_satellites','horiz_dilution_of_position','altitude','altitude_units','geoid_height','geoid_height_units','device_id','measureland_qualifier_flags_id','date_time_day','speed','measureland_qualifier_flag_overall'])
 
+    selected_count = 0
+    non_selected_count = 0
+
     for row_id, row in dataframe.iterrows():
         row_datetime_secs = row['date_time'].strftime('%Y-%m-%d %H:%M:%S')
 
@@ -654,11 +657,26 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
             progress_count = 0
 
         if row_datetime_secs != last_processed_datetime_secs and last_processed_datetime_secs is not None:
+            #print("Type:", rows_pending_decision())
+            count_rows = 0
+            length_selection = len(rows_pending_decision)
+            print("-------------------Rows to choose from--------------: (Total = ", length_selection, ")")
             selected_row = choose_rows(rows_pending_decision)
+            for item in rows_pending_decision:
+                #print("Counting rows: ", count_rows)
+                print("Row number: ", count_rows, " Here is the row\n", rows_pending_decision[count_rows][[2,3,4, 12,15, 16]])
+                print("Row length: ", len(rows_pending_decision[count_rows]))
+                count_rows += 1
 
             if selected_row is not None:
                 # write the selected row out to the file rather than appending it to the dataframe
                 writer.writerow(selected_row[2:16])
+                print("-----selected row: \n", selected_row)
+                print("-----Selected row: \n", selected_row[[2, 3, 4, 12, 15, 16]])
+                selected_count += 1
+            else:
+                print("Rows of poor quality data, nothing selected")
+                non_selected_count += 1
 
             rows_pending_decision = []
 
@@ -668,6 +686,9 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
     f.close()
     if not f:
         print("Output file closed")
+
+    print("Number of rows selected: ", selected_count)
+    print("Number of rows where no selection is made: ", non_selected_count)
 
 ####STATS#####
 
