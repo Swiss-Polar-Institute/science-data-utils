@@ -303,24 +303,20 @@ def main():
                  'measureland_qualifier_flag_overall':'int8'}
 
     track_df_overall_flags = pandas.read_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_combined_overall_flags_test.csv', dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[2, 14])
-    #print(track_df_overall_flags.head(5))
+    print(track_df_overall_flags['geoid_height'].head(5))
     #print(track_df_overall_flags.dtypes)
     cruise_track_data_processing_utils.get_device_summary(track_df_overall_flags)
     points_before_prioritisation = len(track_df_overall_flags)
 
-    # For each second, prioritise the data points according to the source and MQF.
-    #resulting_prioritised_df = cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags, output_filepath='/home/jen/projects/ace_data_management/wip/cruise_track_data/', output_filename='ace_cruise_track_prioritised.csv')
+    # For each second, prioritise the data points according to the source and MQF and output to a final file of prioritised points.
     cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags, output_filepath='/home/jen/projects/ace_data_management/wip/cruise_track_data/', output_filename='ace_cruise_track_prioritised.csv')
 
     # delete the dataframe to save memory
     track_df_overall_flags.drop(track_df_overall_flags.index, inplace=True)
 
-    # write out the prioritised data to a csv file
-    #resulting_prioritised_df.to_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_prioritised.csv')
-
     # read in the data from the file we have just produced
     filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_cruise_track_prioritised.csv'
-    columns = ['date_time', 'latitude', 'longitude', 'device_id']
+    columns = ['date_time', 'latitude', 'longitude', 'device_id', 'measureland_qualifier_flag_overall']
     gps_data = cruise_track_data_plotting.get_data_file(filepath, columns)
     points_after_prioritisation = len(gps_data)
 
@@ -337,23 +333,23 @@ def main():
 
     # plot the prioritised latitude longitude data
     # Plot one second resolution data
-    plt.subplot(211)
-    plt.scatter(gps_data.longitude, gps_data.latitude, c="red")
-    plt.title("One-second resolution")
-    plt.xlabel("Longitude, decimal degrees E")
-    plt.ylabel("Latitude, decimal degrees N")
-    plt.grid(True)
-    plt.legend()
-
-    # Plot sixty-second resolution latitude longitude data
-    sixty_sec_res_gps = gps_data.iloc[::60]
-    plt.subplot(212)
-    plt.scatter(sixty_sec_res_gps.longitude, sixty_sec_res_gps.latitude, c="red")
-    plt.title("Sixty-second resolution")
-    plt.xlabel("Longitude, decimal degrees E")
-    plt.ylabel("Latitude, decimal degrees N")
-    plt.grid(True)
-    plt.legend()
+    # plt.subplot(211)
+    # plt.scatter(gps_data.longitude, gps_data.latitude, c="red")
+    # plt.title("One-second resolution")
+    # plt.xlabel("Longitude, decimal degrees E")
+    # plt.ylabel("Latitude, decimal degrees N")
+    # plt.grid(True)
+    # plt.legend()
+    #
+    # # Plot sixty-second resolution latitude longitude data
+    # sixty_sec_res_gps = gps_data.iloc[::60]
+    # plt.subplot(212)
+    # plt.scatter(sixty_sec_res_gps.longitude, sixty_sec_res_gps.latitude, c="red")
+    # plt.title("Sixty-second resolution")
+    # plt.xlabel("Longitude, decimal degrees E")
+    # plt.ylabel("Latitude, decimal degrees N")
+    # plt.grid(True)
+    # plt.legend()
     #
     # plt.tight_layout()
     # plt.show()
@@ -375,8 +371,8 @@ def main():
     # plt.grid(True)
     # plt.legend()
 
-    #plt.tight_layout()
-    plt.show()
+    # plt.tight_layout()
+    # plt.show()
 
 
 

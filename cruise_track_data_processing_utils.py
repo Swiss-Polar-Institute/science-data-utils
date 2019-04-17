@@ -566,35 +566,12 @@ def remove_intermediate_columns(dataframe):
 
     return combined_dataframe_dropped_cols
 
-# I think this is an old version
-# def prioritise_data_points(dataframe):
-#     """Prioritise the data points within the data frame, depending on the time of the points."""
-#
-#     dataframe['date_time'] = pandas.to_datetime(dataframe['date_time'])
-#
-#     # create a column which contains times in the format shown (to avoid both sources of data having a different format)
-#     dataframe['date_time_secs'] = dataframe['date_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
-#
-#     dataframe['date_time_secs'] = pandas.to_datetime(dataframe['date_time_secs'])
-#
-#     # sort the data frame on the date and time
-#     dataframe_secs_sorted = dataframe.sort_values(dataframe['date_time_secs'])
-
 
 def choose_rows(rows):
     """Choose rows from the dataframe according to values in one of the columns."""
 
     # Ensure that the object is not empty.
     assert(len(rows) > 0)
-    #print("Length of rows:", len(rows))
-    #
-    # # If there is only one row and it has been marked as good data, then select it.
-    # if len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2:
-    #     return rows[0]
-    #
-    # # If there is only one row (but it is not good) do not select it.
-    # elif len(rows) == 1:
-    #     return None
 
     # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality. If the data quality is not good, then do not select, even if there is no other point for that time.
     if len(rows) >= 1 and rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
@@ -641,7 +618,7 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
         print("Output file opened")
 
     writer = csv.writer(f, delimiter=',')
-    writer.writerow(['date_time','latitude','longitude','fix_quality','number_satellites','horiz_dilution_of_position','altitude','altitude_units','geoid_height','geoid_height_units','device_id','measureland_qualifier_flags_id','date_time_day','speed','measureland_qualifier_flag_overall'])
+    writer.writerow(['date_time','latitude','longitude','fix_quality','number_satellites','horiz_dilution_of_position','altitude','altitude_units','geoid_height','geoid_height_units','device_id','speed','measureland_qualifier_flag_overall'])
 
     selected_count = 0
     non_selected_count = 0
@@ -670,6 +647,7 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
 
             if selected_row is not None:
                 # write the selected row out to the file rather than appending it to the dataframe
+                print(type(selected_row))
                 writer.writerow(selected_row[2:16])
                 print("-----selected row: \n", selected_row)
                 print("-----Selected row: \n", selected_row[[2, 3, 4, 12, 15, 16]])
