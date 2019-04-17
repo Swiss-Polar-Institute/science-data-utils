@@ -316,25 +316,25 @@ def main():
 
     # read in the data from the file we have just produced
     filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_cruise_track_prioritised.csv'
-    columns = ['date_time', 'latitude', 'longitude', 'device_id', 'measureland_qualifier_flag_overall']
-    gps_data = cruise_track_data_plotting.get_data_file(filepath, columns)
-    points_after_prioritisation = len(gps_data)
+    columns = ['date_time', 'latitude', 'longitude', 'device_id', 'measureland_qualifier_flag_overall', 'horiz_dilution_of_position']
+    cruise_track_data = cruise_track_data_plotting.get_data_file(filepath, columns)
+    points_after_prioritisation = len(cruise_track_data)
 
     print("Number of data points before prioritisation: ", points_before_prioritisation)
     print("Number of data points after prioritisation: ", points_after_prioritisation)
 
     # get min and max stats to check data set
-    cruise_track_data_processing_utils.get_minmax_stats(gps_data, 'date_time')
-    cruise_track_data_processing_utils.get_minmax_stats(gps_data, 'latitude')
-    cruise_track_data_processing_utils.get_minmax_stats(gps_data, 'longitude')
+    cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'date_time')
+    cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'latitude')
+    cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'longitude')
 
     # get device use summary in prioritised dataset
-    cruise_track_data_processing_utils.get_device_summary(gps_data)
+    cruise_track_data_processing_utils.get_device_summary(cruise_track_data)
 
     # plot the prioritised latitude longitude data
     # Plot one second resolution data
     # plt.subplot(211)
-    # plt.scatter(gps_data.longitude, gps_data.latitude, c="red")
+    # plt.scatter(cruise_track_data.longitude, cruise_track_data.latitude, c="red")
     # plt.title("One-second resolution")
     # plt.xlabel("Longitude, decimal degrees E")
     # plt.ylabel("Latitude, decimal degrees N")
@@ -342,7 +342,7 @@ def main():
     # plt.legend()
     #
     # # Plot sixty-second resolution latitude longitude data
-    # sixty_sec_res_gps = gps_data.iloc[::60]
+    # sixty_sec_res_gps = cruise_track_data.iloc[::60]
     # plt.subplot(212)
     # plt.scatter(sixty_sec_res_gps.longitude, sixty_sec_res_gps.latitude, c="red")
     # plt.title("Sixty-second resolution")
@@ -356,7 +356,7 @@ def main():
 
     # Plot position data vs time to see coverage of prioritised data set
     #plt.subplot(211)
-    # plt.scatter(gps_data.date_time, gps_data.latitude)
+    # plt.scatter(cruise_track_data.date_time, cruise_track_data.latitude)
     # plt.title("Latitude coverage")
     # plt.xlabel("Date and time, UTC")
     # plt.ylabel("Latitude, decimal degrees N")
@@ -364,7 +364,7 @@ def main():
     # plt.legend()
     #
     # #plt.subplot(211)
-    # plt.scatter(gps_data.date_time, gps_data.longitude)
+    # plt.scatter(cruise_track_data.date_time, cruise_track_data.longitude)
     # plt.title("Longitude coverage")
     # plt.xlabel("Date and time, UTC")
     # plt.ylabel("Longitude, decimal degrees N")
