@@ -109,4 +109,4 @@ def plot_speed(dataframe1, colour, legend_label):
 #
 # plot_speed(gps_data_flagged, "red", "trimble")
 
-def plot_altitude(df):
+#def plot_altitude(df):

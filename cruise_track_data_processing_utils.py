@@ -598,6 +598,23 @@ def choose_rows(rows):
     return None
 
 
+def convert_float_nan_to_string_NaN(row):
+
+    i = 0
+
+    result = row[:]
+
+    while i < len(result):
+
+        if type(result[i]) == float and math.isnan(result[i]):
+
+            result[i] = "NaN"
+
+        i = i+1
+
+    return result
+
+
 def prioritise_data_points(dataframe, output_filepath, output_filename):
     """Create a new dataframe from the prioritised points according to the conditions required. Rows are chosen from small groups which occur at the same time (to seconds)."""
 
@@ -648,6 +665,8 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
             if selected_row is not None:
                 # write the selected row out to the file rather than appending it to the dataframe
                 print(type(selected_row))
+
+                convert_float_nan_to_string_NaN(selected_row)
                 writer.writerow(selected_row[2:16])
                 print("-----selected row: \n", selected_row)
                 print("-----Selected row: \n", selected_row[[2, 3, 4, 12, 15, 16]])
