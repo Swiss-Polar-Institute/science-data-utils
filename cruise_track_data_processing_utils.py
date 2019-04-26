@@ -256,6 +256,12 @@ def set_utc(date_time):
     return date_time
 
 
+def check_position(previous_position, current_position):
+    """Compare the latitude and longitude between the current and previous positions. If exactly the same (to 6 dp) then this current position is not a good data point."""
+
+    return
+
+
 def calculate_speed(position_df):
     """Calculate the speed between consectutive points and add this as a variable to the dataframe."""
 
@@ -268,6 +274,7 @@ def calculate_speed(position_df):
     current_date = earliest_date_time
 
     previous_position = get_location(earliest_date_time, position_df)
+    print("Previous position: ", previous_position)
     #datetime_previous, latitude_previous, longitude_previous = previous_position
 
     # count_speed_errors = 0
@@ -286,6 +293,10 @@ def calculate_speed(position_df):
         # print(current_position)
         speed_knots = knots_two_points(previous_position, current_position)
         position_df.at[row_index, 'speed'] = speed_knots
+
+        print("calculated speeds")
+        check_position(previous_position, current_position)
+        print("Checked position")
 
         previous_position = current_position
 
