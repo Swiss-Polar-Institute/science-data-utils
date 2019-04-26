@@ -7,7 +7,8 @@ import pandas
 import glob
 import datetime
 
-def process_track_data(dataframe_name, concatenated_filepath, concatenated_filename, input_filepath, input_filename, device_id, output_create_files_filepath, output_create_files_filename, invalid_position_filepath, output_flagging_filepath, output_flagging_filename):
+def process_track_data(dataframe_name, concatenated_filepath, concatenated_filename, input_filepath, input_filename, device_id, output_create_files_filepath, output_create_files_filename,
+                       invalid_position_filepath, output_flagging_filepath, output_flagging_filename):
     """Process track data from some input. Output data as a pandas dataframe and perform some quality assurance and quality checking of the data points."""
 
     concatenated_file = cruise_track_data_processing_utils.get_concatenated_csv_data(concatenated_filepath, concatenated_filename, device_id, output_create_files_filepath, output_create_files_filename)
@@ -33,9 +34,12 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
 
     # Check the speed throughout the cruise track to ensure there are not periods where the ship is travelling impossibly fast. Flag data points.
     track_speed_df = cruise_track_data_processing_utils.calculate_speed(track_df)
+    print(track_speed_df.info())
+    print(track_speed_df['speed'].head(10))
     track_speed_df = cruise_track_data_processing_utils.analyse_speed(track_df)
     #track_speed_df = cruise_track_data_processing_utils.flag_speed(track_speed_df)
 
+    print(track_speed_df['measureland_qualifier_flag_speed'].head(10))
     # Check the course of the ship throughout the track to ensure it is not making impossible turns or accelerating impossibly fast. Flag data points.
     (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error) = cruise_track_data_processing_utils.analyse_course(track_df)
     print("Number of bearing errors when the ship is moving: ", count_bearing_errors)
@@ -110,10 +114,11 @@ def decide_start_of_processing(dataframe_name, concatenated_filepath, concatenat
 
     intermediate_files = output_flagging_filepath + "/" + output_flagging_filename + "*.csv"
     intermediate_file_list = glob.glob(intermediate_files)
+    print("Checking if intermediate files, ", intermediate_files, " exist")
 
     if len(intermediate_file_list) == 0:
         print("Intermediate files do not exist. Doing processing from the beginning.")
-        trimble_df = process_track_data(dataframe_name, concatenated_filepath, concatenated_filename, input_filepath,
+        intermediate_df = process_track_data(dataframe_name, concatenated_filepath, concatenated_filename, input_filepath,
                                         input_filename, device_id, output_create_files_filepath, output_create_files_filename,
                                         invalid_position_filepath, output_flagging_filepath, output_flagging_filename)
     else:
@@ -173,37 +178,37 @@ def main():
     """Run the processing for the different tracking instruments."""
 
     # print("****PROCESSING TRIMBLE GPS DATA ****")
-    #
-    # concatenated_filepath_trimble = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # concatenated_filename_trimble = 'ace_trimble_gps'
-    #
-    # input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # input_filename_trimble_gps = 'ace_trimble_gps'
-    #
+
+    concatenated_filepath_trimble = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    concatenated_filename_trimble = 'ace_trimble_gps'
+
+    input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    input_filename_trimble_gps = 'ace_trimble_gps'
+
     # # TESTING USING SUBSET OF FILES.
     # #input_filepath_trimble_gps = ''
     # #input_filename_trimble_gps = ''
     #
     # # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-19.csv']
     # # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
-    #
-    # device_id_trimble_gps=63
-    #
-    # output_create_files_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # output_create_files_filename_trimble_gps = 'ace_trimble_gps'
-    #
-    # invalid_position_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
-    #
-    # output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
-    # output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
-    #
-    # dataframe_name_trimble = 'trimble'
-    #
-    # trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
-    #                                      input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
-    #                                      output_create_files_filepath_trimble_gps,
-    #                                      output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
-    #                                      output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
+
+    device_id_trimble_gps=63
+
+    output_create_files_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    output_create_files_filename_trimble_gps = 'ace_trimble_gps'
+
+    invalid_position_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv'
+
+    output_flagging_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
+    output_flagging_filename_trimble_gps = 'flagging_data_ace_trimble_gps'
+
+    dataframe_name_trimble = 'trimble'
+
+    trimble_intermediate_df = decide_start_of_processing(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
+                                         input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
+                                         output_create_files_filepath_trimble_gps,
+                                         output_create_files_filename_trimble_gps, invalid_position_filepath_trimble_gps,
+                                         output_flagging_filepath_trimble_gps, output_flagging_filename_trimble_gps)
     #
     # # trimble_df = process_track_data(dataframe_name_trimble, concatenated_filepath_trimble, concatenated_filename_trimble,
     # #                                  input_filepath_trimble_gps, input_filename_trimble_gps, device_id_trimble_gps,
@@ -269,7 +274,7 @@ def main():
     #
     # # Get some stats about and plot the speed throughout the cruise (use this version when doing the intermediate processing)
     # cruise_track_data_processing_utils.get_stats(glonass_intermediate_df, "speed")
-    # glonass_intermediate_remove_outlier = glonass_intermediate_df.loc[(trimble_intermediate_df['speed'] <= 100) & (glonass_intermediate_df['speed'] > 2.5)]
+    # glonass_intermediate_remove_outlier = glonass_intermediate_df.loc[(glonass_intermediate_df['speed'] <= 100) & (glonass_intermediate_df['speed'] > 2.5)]
     # cruise_track_data_processing_utils.get_stats(glonass_intermediate_remove_outlier, "speed")
     # cruise_track_data_plotting.plot_speed(glonass_intermediate_remove_outlier, "red", "glonass")
     #
@@ -284,52 +289,52 @@ def main():
     #
     # cruise_track_data_plotting.plot_data_sources_from_dataframe(result_dataframe, 'device_id')
 
-    #### TEST PRIORITISATION RUNS AND COMPLETES ###
-
-    # read in the combined dataframe from file
-    datatypes = {'id': 'int32',
-                 'latitude': 'float64',
-                 'longitude': 'float64',
-                 'fix_quality': 'int8',
-                 'number_satellites': 'int8',
-                 'horiz_dilution_of_position': 'float16',
-                 'altitude': 'float16',
-                 'altitude_units': 'category',
-                 'geoid_height': 'float16',
-                 'geoid_height_units': 'category',
-                 'device_id': 'int8',
-                 'measureland_qualifier_flags_id': 'int8',
-                 'speed': 'float64',
-                 'measureland_qualifier_flag_overall':'int8'}
-
-    track_df_overall_flags = pandas.read_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_combined_overall_flags_test.csv', dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[2, 14])
-    print(track_df_overall_flags['geoid_height'].head(5))
-    #print(track_df_overall_flags.dtypes)
-    cruise_track_data_processing_utils.get_device_summary(track_df_overall_flags)
-    points_before_prioritisation = len(track_df_overall_flags)
-
-    # For each second, prioritise the data points according to the source and MQF and output to a final file of prioritised points.
-    cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags, output_filepath='/home/jen/projects/ace_data_management/wip/cruise_track_data/', output_filename='ace_cruise_track_prioritised.csv')
-
-    # delete the dataframe to save memory
-    track_df_overall_flags.drop(track_df_overall_flags.index, inplace=True)
-
-    # read in the data from the file we have just produced
-    filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_cruise_track_prioritised.csv'
-    columns = ['date_time', 'latitude', 'longitude', 'device_id', 'measureland_qualifier_flag_overall', 'horiz_dilution_of_position']
-    cruise_track_data = cruise_track_data_plotting.get_data_file(filepath, columns)
-    points_after_prioritisation = len(cruise_track_data)
-
-    print("Number of data points before prioritisation: ", points_before_prioritisation)
-    print("Number of data points after prioritisation: ", points_after_prioritisation)
-
-    # get min and max stats to check data set
-    cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'date_time')
-    cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'latitude')
-    cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'longitude')
-
-    # get device use summary in prioritised dataset
-    cruise_track_data_processing_utils.get_device_summary(cruise_track_data)
+    # #### TEST PRIORITISATION RUNS AND COMPLETES ###
+    #
+    # # read in the combined dataframe from file
+    # datatypes = {'id': 'int32',
+    #              'latitude': 'float64',
+    #              'longitude': 'float64',
+    #              'fix_quality': 'int8',
+    #              'number_satellites': 'int8',
+    #              'horiz_dilution_of_position': 'float16',
+    #              'altitude': 'float16',
+    #              'altitude_units': 'category',
+    #              'geoid_height': 'float16',
+    #              'geoid_height_units': 'category',
+    #              'device_id': 'int8',
+    #              'measureland_qualifier_flags_id': 'int8',
+    #              'speed': 'float64',
+    #              'measureland_qualifier_flag_overall':'int8'}
+    #
+    # track_df_overall_flags = pandas.read_csv('/home/jen/projects/ace_data_management/wip/cruise_track_data/track_data_combined_overall_flags_test.csv', dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[2, 14])
+    # print(track_df_overall_flags['geoid_height'].head(5))
+    # #print(track_df_overall_flags.dtypes)
+    # cruise_track_data_processing_utils.get_device_summary(track_df_overall_flags)
+    # points_before_prioritisation = len(track_df_overall_flags)
+    #
+    # # For each second, prioritise the data points according to the source and MQF and output to a final file of prioritised points.
+    # cruise_track_data_processing_utils.prioritise_data_points(track_df_overall_flags, output_filepath='/home/jen/projects/ace_data_management/wip/cruise_track_data/', output_filename='ace_cruise_track_prioritised.csv')
+    #
+    # # delete the dataframe to save memory
+    # track_df_overall_flags.drop(track_df_overall_flags.index, inplace=True)
+    #
+    # # read in the data from the file we have just produced
+    # filepath = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_cruise_track_prioritised.csv'
+    # columns = ['date_time', 'latitude', 'longitude', 'device_id', 'measureland_qualifier_flag_overall']
+    # cruise_track_data = cruise_track_data_plotting.get_data_file(filepath, columns)
+    # points_after_prioritisation = len(cruise_track_data)
+    #
+    # print("Number of data points before prioritisation: ", points_before_prioritisation)
+    # print("Number of data points after prioritisation: ", points_after_prioritisation)
+    #
+    # # get min and max stats to check data set
+    # cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'date_time')
+    # cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'latitude')
+    # cruise_track_data_processing_utils.get_minmax_stats(cruise_track_data, 'longitude')
+    #
+    # # get device use summary in prioritised dataset
+    # cruise_track_data_processing_utils.get_device_summary(cruise_track_data)
 
     # plot the prioritised latitude longitude data
     # Plot one second resolution data

@@ -302,15 +302,15 @@ def analyse_speed(position_df):
     print("Upper bound:", upper_bound)
 
     # no speed value
-#    position_df.loc[position_df['speed'] == "N/A", 'measureland_qualifier_flag_speed'] = 10
-
+    position_df.loc[position_df['speed'].apply(math.isnan), 'measureland_qualifier_flag_speed'] = 10
+    print("Rows where the speed is null: ", position_df.loc[position_df['speed'].apply(math.isnan)])
     # speed greater than upper bound
     position_df.loc[position_df['speed'] > upper_bound, 'measureland_qualifier_flag_speed'] = 5
 
     # speed within allowed limits (0 <= speed <= upper bound)
     position_df.loc[position_df['speed'] <= upper_bound, 'measureland_qualifier_flag_speed'] = 2
 
-    print(position_df.isnull())
+    print(position_df['measureland_qualifier_flag_speed'].isnull())
 
     position_df['measureland_qualifier_flag_speed'] = position_df['measureland_qualifier_flag_speed'].astype(int)
 
