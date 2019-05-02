@@ -36,6 +36,7 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     track_speed_df = cruise_track_data_processing_utils.calculate_speed(track_df)
     print(track_speed_df.info())
     print(track_speed_df['speed'].head(10))
+    print(track_speed_df['distance'].head(10))
     track_speed_df = cruise_track_data_processing_utils.analyse_speed(track_df)
     #track_speed_df = cruise_track_data_processing_utils.flag_speed(track_speed_df)
 

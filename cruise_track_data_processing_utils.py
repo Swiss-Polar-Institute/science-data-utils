@@ -228,7 +228,7 @@ def calculate_distance(origin, destination):
 def knots_two_points(origin, destination):
     """Calculate the speed in knots between two locations which are dictionaries containing latitude, longitude and date_time."""
 
-    distance = calculate_distance(origin, destination)
+    distance_m = calculate_distance(origin, destination)
 
     datetime1_timestamp, lat1, lon1 = origin
     datetime2_timestamp, lat2, lon2 = destination
@@ -241,10 +241,10 @@ def knots_two_points(origin, destination):
     seconds = abs((datetime1) - (datetime2))
     # seconds = abs((datetime_str1)-(datetime_str2)).total_seconds()
     conversion = 3600 / 1852  # convert 1 ms-1 to knots (nautical miles per hour; 1 nm = 1852 metres)
-    speed_knots = (distance / seconds) * conversion
+    speed_knots = (distance_m / seconds) * conversion
 
     if seconds > 0:
-        return speed_knots
+        return (distance_m, speed_knots)
     else:
         return "N/A"
 
@@ -254,12 +254,6 @@ def set_utc(date_time):
     utc = datetime.timezone(datetime.timedelta(0))
     date_time = date_time.replace(tzinfo=utc)
     return date_time
-
-
-def check_position(previous_position, current_position):
-    """Compare the latitude and longitude between the current and previous positions. If exactly the same (to 6 dp) then this current position is not a good data point."""
-
-    return
 
 
 def calculate_speed(position_df):
@@ -291,12 +285,14 @@ def calculate_speed(position_df):
         current_position = position[2:5]
 
         # print(current_position)
-        speed_knots = knots_two_points(previous_position, current_position)
+        (position_difference_m, speed_knots) = knots_two_points(previous_position, current_position)
         position_df.at[row_index, 'speed'] = speed_knots
 
-        print("calculated speeds")
-        check_position(previous_position, current_position)
-        print("Checked position")
+        #print("calculated speeds")
+
+        position_df.at[row_index, 'distance'] = position_difference_m
+
+        #print("Checked position difference")
 
         previous_position = current_position
 
