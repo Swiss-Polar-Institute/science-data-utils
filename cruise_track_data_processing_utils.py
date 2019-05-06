@@ -324,6 +324,31 @@ def analyse_speed(position_df):
     return position_df
 
 
+def analyse_distance_between_points(position_df):
+    """Analyse the distance between the points. Even when the ship is stationary, the lat and long vary slightly. Where there is an error in the lat and long being the same in consecutive points, the
+    distance should be greater than 0 (to 6 dp, which is equivalent to 0.19 cm at the Equator)."""
+
+    print("Analysing distance between consecutive points.")
+
+    maximum_distance = 0.019 # 1 x 10^-6 of a degree is 0.019 m
+
+    # no distance value
+    position_df.loc[position_df['distance'].apply(math.isnan), 'measureland_qualifier_flag_distance'] = 10
+    print("Rows where the distance is null: ", position_df.loc[position_df['distance'].apply(math.isnan)])
+
+    # bad data
+    print("Flagging bad data distance")
+    position_df.loc[abs(position_df['distance']) <= maximum_distance, 'measureland_qualifier_flag_distance'] = 5
+
+    # good data
+    print("Flagging good data distance")
+    position_df.loc[abs(position_df['distance']) > maximum_distance, 'measureland_qualifier_flag_distance'] = 2
+
+    position_df['measureland_qualifier_flag_distance'] = position_df['measureland_qualifier_flag_distance'].astype(int)
+
+    return position_df
+
+
 def calculate_bearing(origin, destination):
     """Calculate the direction turned between two points."""
 

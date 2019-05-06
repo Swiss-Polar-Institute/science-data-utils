@@ -33,14 +33,18 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     start_dataframe_length = len(track_df)
 
     # Check the speed throughout the cruise track to ensure there are not periods where the ship is travelling impossibly fast. Flag data points.
-    track_speed_df = cruise_track_data_processing_utils.calculate_speed(track_df)
-    print(track_speed_df.info())
-    print(track_speed_df['speed'].head(10))
-    print(track_speed_df['distance'].head(10))
-    track_speed_df = cruise_track_data_processing_utils.analyse_speed(track_df)
-    #track_speed_df = cruise_track_data_processing_utils.flag_speed(track_speed_df)
+    track_df = cruise_track_data_processing_utils.calculate_speed(track_df)
+    print(track_df.info())
+    print(track_df['speed'].head(10))
+    print(track_df['distance'].head(10))
+    track_df = cruise_track_data_processing_utils.analyse_speed(track_df)
+    track_df = cruise_track_data_processing_utils.analyse_distance_between_points(track_df)
+    #track_df = cruise_track_data_processing_utils.flag_speed(track_df)
 
-    print(track_speed_df['measureland_qualifier_flag_speed'].head(10))
+    print(track_df['measureland_qualifier_flag_speed'].head(10))
+    print(track_df['measureland_qualifier_flag_distance'].head(10))
+    print(track_df['distance'].head(100))
+
     # Check the course of the ship throughout the track to ensure it is not making impossible turns or accelerating impossibly fast. Flag data points.
     (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error) = cruise_track_data_processing_utils.analyse_course(track_df)
     print("Number of bearing errors when the ship is moving: ", count_bearing_errors)
