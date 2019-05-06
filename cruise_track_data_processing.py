@@ -37,9 +37,8 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     print(track_df.info())
     print(track_df['speed'].head(10))
     print(track_df['distance'].head(10))
-    track_df = cruise_track_data_processing_utils.analyse_speed(track_df)
+   # track_df = cruise_track_data_processing_utils.analyse_speed(track_df)
     track_df = cruise_track_data_processing_utils.analyse_distance_between_points(track_df)
-    #track_df = cruise_track_data_processing_utils.flag_speed(track_df)
 
     print(track_df['measureland_qualifier_flag_speed'].head(10))
     print(track_df['measureland_qualifier_flag_distance'].head(10))
@@ -190,12 +189,12 @@ def main():
     input_filepath_trimble_gps = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     input_filename_trimble_gps = 'ace_trimble_gps'
 
-    # # TESTING USING SUBSET OF FILES.
-    # #input_filepath_trimble_gps = ''
-    # #input_filename_trimble_gps = ''
+    # TESTING USING SUBSET OF FILES.
+    # input_filepath_trimble_gps = ''
+    # input_filename_trimble_gps = ''
     #
-    # # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-03-19.csv']
-    # # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
+    # file_list = ['/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2016-12-24.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-01-18.csv', '/home/jen/projects/ace_data_management/wip/cruise_track_data//ace_trimble_gps_2017-01-19.csv']
+    # header = ['id', 'date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position', 'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'measureland_qualifier_flags_id', 'date_time_day']
 
     device_id_trimble_gps=63
 

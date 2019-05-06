@@ -342,7 +342,13 @@ def analyse_distance_between_points(position_df):
 
     # good data
     print("Flagging good data distance")
-    position_df.loc[abs(position_df['distance']) > maximum_distance, 'measureland_qualifier_flag_distance'] = 2
+
+    sailing_periods = get_list_block_time_periods("/home/jen/projects/ace_data_management/wip/cruise_track_data/sailing.csv")
+
+    for sailing_period in sailing_periods:
+        print(sailing_period[0], sailing_period[1])
+
+        position_df.loc[(abs(position_df['distance']) > maximum_distance) & (sailing_period[0] < position_df['date_time']) & (position_df['date_time'] < sailing_period[1]), 'measureland_qualifier_flag_distance'] = 2
 
     position_df['measureland_qualifier_flag_distance'] = position_df['measureland_qualifier_flag_distance'].astype(int)
 
@@ -500,28 +506,11 @@ def get_list_block_time_periods(filename_time_periods):
                 time_ending = datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
 
                 time_periods.append((time_beginning, time_ending, row[2]))
-        #print("List of time periods: ", time_periods)
+        print("List of time periods: ", time_periods)
 
         get_list_block_time_periods.cached[filename_time_periods] = time_periods
 
     return get_list_block_time_periods.cached[filename_time_periods]
-
-
-# def calculate_manual_visual_position_errors(row):
-#     """Get the list of periods when the track is visually incorrect (manual checking) and flag all of the GPS datapoints that lie in these periods as being bad data."""
-#
-#     invalid_times = get_list_lock_time_periods('/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv')
-#
-#     for invalid_time in invalid_times:
-#         #print("Invalid time: ", invalid_time)
-#         #print("Invalid start time: ", invalid_time[0])
-#         time_beginning = invalid_time[0]
-#         time_ending = invalid_time[1]
-#
-#         if row['date_time'] >= time_beginning and row['date_time'] <= time_ending:
-#             return 5
-#
-#     return 2
 
 
 def update_visual_position_flag(dataframe, invalid_position_filepath):
