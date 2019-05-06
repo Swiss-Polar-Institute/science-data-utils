@@ -483,34 +483,34 @@ def analyse_course(position_df):
     return (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error)
 
 
-def get_list_visual_position_errors(invalid_position_filename):
-    """Get a file containing start and end times of errors and create a dataframe of these."""
+def get_list_block_time_periods(filename_time_periods):
+    """Get a file containing start and end times of blocks of times to be applied to the data (such as from visually marked errors, or when the ship is in port) and create a list of these."""
 
-    if not hasattr(get_list_visual_position_errors, "cached"):
-        get_list_visual_position_errors.cached = {}
+    if not hasattr(get_list_block_time_periods, "cached"):
+        get_list_block_time_periods.cached = {}
 
-    if invalid_position_filename not in get_list_visual_position_errors.cached:
-        with open(invalid_position_filename, 'r') as file:
+    if filename_time_periods not in get_list_block_time_periods.cached:
+        with open(filename_time_periods, 'r') as file:
             contents = csv.reader(file)
             next(contents)
 
-            visual_position_errors = []
+            time_periods = []
             for row in contents:
                 time_beginning = datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
                 time_ending = datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
 
-                visual_position_errors.append((time_beginning, time_ending, row[2]))
-        #print("List of visual error times: ", visual_position_errors)
+                time_periods.append((time_beginning, time_ending, row[2]))
+        #print("List of time periods: ", time_periods)
 
-        get_list_visual_position_errors.cached[invalid_position_filename] = visual_position_errors
+        get_list_block_time_periods.cached[filename_time_periods] = time_periods
 
-    return get_list_visual_position_errors.cached[invalid_position_filename]
+    return get_list_block_time_periods.cached[filename_time_periods]
 
 
 # def calculate_manual_visual_position_errors(row):
 #     """Get the list of periods when the track is visually incorrect (manual checking) and flag all of the GPS datapoints that lie in these periods as being bad data."""
 #
-#     invalid_times = get_list_visual_position_errors('/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv')
+#     invalid_times = get_list_lock_time_periods('/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_trimble_manual_position_errors.csv')
 #
 #     for invalid_time in invalid_times:
 #         #print("Invalid time: ", invalid_time)
@@ -533,7 +533,7 @@ def update_visual_position_flag(dataframe, invalid_position_filepath):
     if invalid_position_filepath == '':
         dataframe['measureland_qualifier_flag_visual'] = '2'
     else:
-        invalid_times = get_list_visual_position_errors(invalid_position_filepath)
+        invalid_times = get_list_block_time_periods(invalid_position_filepath)
 
         # Assume the data point is good unless it has been flagged visually.
         dataframe['measureland_qualifier_flag_visual'] = '2'
