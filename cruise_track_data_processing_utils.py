@@ -421,12 +421,12 @@ def analyse_course(position_df):
         difference_in_bearing = calculate_bearing_difference(current_bearing, previous_bearing)
 
         # Calculate acceleration between two points
-        current_speed_knots = knots_two_points(previous_position, current_position)
+        current_conditions = knots_two_points(previous_position, current_position)
+        current_speed_knots = current_conditions[1] # altered to this because distance and speed are output as a tuple from knots_two_points
 
         time_difference = (current_position[0] - previous_position[0]).total_seconds()
-        speed_difference_metres_per_sec = (current_speed_knots - previous_speed_knots) * (
-                    1852 / 3600)  # convert knots to ms-1
 
+        speed_difference_metres_per_sec = (current_speed_knots - previous_speed_knots) * (1852 / 3600)  # convert knots to ms-1
         if time_difference > 0:
             acceleration = speed_difference_metres_per_sec / time_difference
         else:
@@ -436,18 +436,18 @@ def analyse_course(position_df):
         error_message_bearing = ""
         error_message_acceleration = ""
 
-        if difference_in_bearing == "N/A":
+        if abs(difference_in_bearing) == "N/A":
             error_message_bearing = "No bearing?"
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 10
-        elif difference_in_bearing >= 5 and current_speed_knots > 0.3:
+        elif abs(difference_in_bearing) >= 10 and current_speed_knots > 0.3:
             error_message_bearing = "** Turn too tight **"
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 5
             count_bearing_errors += 1
-        elif difference_in_bearing >= 5 and current_speed_knots <= 0.3:
+        elif abs(difference_in_bearing) >= 10 and current_speed_knots <= 0.3:
             error_message_bearing = "** Turn tight but ship stationary **"
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 3
             count_ship_stationary_bearing_error += 1
-        elif difference_in_bearing < 5:
+        elif abs(difference_in_bearing) < 10:
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2
 
         if error_message_bearing != "":
