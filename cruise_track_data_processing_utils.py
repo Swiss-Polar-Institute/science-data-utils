@@ -450,18 +450,18 @@ def analyse_course(position_df):
         elif abs(difference_in_bearing) < 10:
             position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # good value
 
-        if error_message_bearing != "":
-            print("Previous: ", previous_position)
-            print("Current: ", current_position)
-            print("Current speed: ", current_speed_knots)
-            print("Error:  {} Start {}  ({:.4f}, {:.4f})   End {} to position ({:.4f}, {:.4f}) bearing change: {} degrees".format(error_message_bearing,
-                                                                                     previous_position[0],
-                                                                                     previous_position[1],
-                                                                                     previous_position[2],
-                                                                                     current_position[0],
-                                                                                     current_position[1],
-                                                                                     current_position[2],
-                                                                                     difference_in_bearing))
+        # if error_message_bearing != "":
+        #     print("Previous: ", previous_position)
+        #     print("Current: ", current_position)
+        #     print("Current speed: ", current_speed_knots)
+        #     print("Error:  {} Start {}  ({:.4f}, {:.4f})   End {} to position ({:.4f}, {:.4f}) bearing change: {} degrees".format(error_message_bearing,
+        #                                                                              previous_position[0],
+        #                                                                              previous_position[1],
+        #                                                                              previous_position[2],
+        #                                                                              current_position[0],
+        #                                                                              current_position[1],
+        #                                                                              current_position[2],
+        #                                                                              difference_in_bearing))
 
         if acceleration == "N/A":
             error_message_acceleration = "No acceleration value calculated"
@@ -538,16 +538,20 @@ def update_visual_position_flag(dataframe, invalid_position_filepath):
 def calculate_measureland_qualifier_flag_overall(row):
     """Calculate the overall data quality flag taking into account the others that have been assigned."""
 
-    #print("Computing overall measureland qualifier flags")
+    mqf_tuple = (row['measureland_qualifier_flag_speed'], row['measureland_qualifier_flag_distance'],
+                 row['measureland_qualifier_flag_course'], row['measureland_qualifier_flag_acceleration'],
+                 row['measureland_qualifier_flag_visual'])
 
-    if row['measureland_qualifier_flag_speed'] == 3 or row['measureland_qualifier_flag_distance'] == 3 or row['measureland_qualifier_flag_course'] == 3 or row['measureland_qualifier_flag_acceleration'] == 3 or row['measureland_qualifier_flag_visual'] == 3:
-        return 3 # bad value
-    elif row['measureland_qualifier_flag_speed'] == 1 and row['measureland_qualifier_flag_distance'] == 1 and row['measureland_qualifier_flag_course'] == 1 and row['measureland_qualifier_flag_acceleration'] == 1 and row['measureland_qualifier_flag_visual'] == 1:
+    if mqf_tuple.count(3) >= 1:
+        return 3 # probably bad value
+    elif mqf_tuple.count(1) == len(mqf_tuple):
         return 1 # good value
-    # elif (row['measureland_qualifier_flag_speed'] == 3 or row['measureland_qualifier_flag_course'] == 3 or row['measureland_qualifier_flag_acceleration'] == 3) and (row['measureland_qualifier_flag_speed'] != 5 or row['measureland_qualifier_flag_course'] != 5 or row['measureland_qualifier_flag_acceleration'] != 5):
-    #     return 3
-    else:
+    elif (mqf_tuple.count(9) >= 1) and (mqf_tuple.count(1) == (len(mqf_tuple) - mqf_tuple.count(9))):
         return 2 # probably good value
+    elif (mqf_tuple.count(2) >= 1) and (mqf_tuple.count(1) == (len(mqf_tuple) - mqf_tuple.count(2))):
+        return 2 # probably good value
+    else:
+        return 2 # values that have passed the quality check are likely to be of good quality according to the criteria used, so assign as probably good value
 
 
 def combine_position_dataframes(dataframe1, dataframe2):
