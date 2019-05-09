@@ -279,7 +279,7 @@ def calculate_speed(position_df):
         row_index = position[0]
 
         if line_number == 0:
-            position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 1
+            position_df.at[row_index, 'measureland_qualifier_flag_speed'] = 1 # assume good values to begin with
             continue
 
         current_position = position[2:5]
@@ -309,13 +309,13 @@ def analyse_speed(position_df):
     print("Upper bound:", upper_bound)
 
     # no speed value
-    position_df.loc[position_df['speed'].apply(math.isnan), 'measureland_qualifier_flag_speed'] = 10
+    position_df.loc[position_df['speed'].apply(math.isnan), 'measureland_qualifier_flag_speed'] = 9 # missing values
     print("Rows where the speed is null: ", position_df.loc[position_df['speed'].apply(math.isnan)])
     # speed greater than upper bound
-    position_df.loc[position_df['speed'] > upper_bound, 'measureland_qualifier_flag_speed'] = 5
+    position_df.loc[position_df['speed'] > upper_bound, 'measureland_qualifier_flag_speed'] = 3 # probably bad values
 
     # speed within allowed limits (0 <= speed <= upper bound)
-    position_df.loc[position_df['speed'] <= upper_bound, 'measureland_qualifier_flag_speed'] = 2
+    position_df.loc[position_df['speed'] <= upper_bound, 'measureland_qualifier_flag_speed'] = 1 # good values
 
     print(position_df['measureland_qualifier_flag_speed'].isnull())
 
@@ -333,12 +333,12 @@ def analyse_distance_between_points(position_df):
     maximum_distance = 0.019 # 1 x 10^-6 of a degree is 0.019 m
 
     # no distance value
-    position_df.loc[position_df['distance'].apply(math.isnan), 'measureland_qualifier_flag_distance'] = 10
+    position_df.loc[position_df['distance'].apply(math.isnan), 'measureland_qualifier_flag_distance'] = 9 # missing values
     print("Rows where the distance is null: ", position_df.loc[position_df['distance'].apply(math.isnan)])
 
     # bad data
     print("Flagging bad data distance")
-    position_df.loc[abs(position_df['distance']) <= maximum_distance, 'measureland_qualifier_flag_distance'] = 5
+    position_df.loc[abs(position_df['distance']) <= maximum_distance, 'measureland_qualifier_flag_distance'] = 3 # probably bad values
 
     # good data
     print("Flagging good data distance")
@@ -348,7 +348,7 @@ def analyse_distance_between_points(position_df):
     for sailing_period in sailing_periods:
         print(sailing_period[0], sailing_period[1])
 
-        position_df.loc[(abs(position_df['distance']) > maximum_distance) & (sailing_period[0] < position_df['date_time']) & (position_df['date_time'] < sailing_period[1]), 'measureland_qualifier_flag_distance'] = 2
+        position_df.loc[(abs(position_df['distance']) > maximum_distance) & (sailing_period[0] < position_df['date_time']) & (position_df['date_time'] < sailing_period[1]), 'measureland_qualifier_flag_distance'] = 1 # good values
 
     position_df['measureland_qualifier_flag_distance'] = position_df['measureland_qualifier_flag_distance'].astype(int)
 
@@ -410,8 +410,8 @@ def analyse_course(position_df):
         row_index = position[0]
 
         if line_number == 0:
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1
-            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 1
+            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # assume good value
+            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 1 # assume good value
             continue
 
         current_position = position[2:5]
@@ -438,17 +438,17 @@ def analyse_course(position_df):
 
         if abs(difference_in_bearing) == "N/A":
             error_message_bearing = "No bearing?"
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 10
+            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 9 # missing values
         elif abs(difference_in_bearing) >= 10 and current_speed_knots > 0.3:
             error_message_bearing = "** Turn too tight **"
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 5
+            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 3 # probably bad value
             count_bearing_errors += 1
         elif abs(difference_in_bearing) >= 10 and current_speed_knots <= 0.3:
             error_message_bearing = "** Turn tight but ship stationary **"
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 3
+            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2 # probably good value
             count_ship_stationary_bearing_error += 1
         elif abs(difference_in_bearing) < 10:
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2
+            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # good value
 
         if error_message_bearing != "":
             print("Previous: ", previous_position)
@@ -464,20 +464,20 @@ def analyse_course(position_df):
                                                                                      difference_in_bearing))
 
         if acceleration == "N/A":
-            error_message_acceleration = "No acceleration"
-            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 10
+            error_message_acceleration = "No acceleration value calculated"
+            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 9 # no value
         elif acceleration > 1:
             count_acceleration_errors += 1
-            error_message_acceleration = "** Acceleration to quick **"
-            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 5
+            error_message_acceleration = "** Acceleration too quick **"
+            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 3 # probably bad value
         elif acceleration <= 1:
-            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 2
+            position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 1 # good value
 
-        if error_message_acceleration != "":
-            print("Error:  {} {} ({:.4f}, {:.4f}) acceleration: {} ms-2".format(error_message_acceleration,
-                                                                                current_position[0],
-                                                                                current_position[1],
-                                                                                current_position[2], acceleration))
+        # if error_message_acceleration != "":
+        #     print("Error:  {} {} ({:.4f}, {:.4f}) acceleration: {} ms-2".format(error_message_acceleration,
+        #                                                                         current_position[0],
+        #                                                                         current_position[1],
+        #                                                                         current_position[2], acceleration))
 
         previous_position = current_position
         previous_bearing = current_bearing
@@ -520,17 +520,17 @@ def update_visual_position_flag(dataframe, invalid_position_filepath):
 
     # Assume the data point is good unless it has been flagged visually.
     if invalid_position_filepath == '':
-        dataframe['measureland_qualifier_flag_visual'] = '2'
+        dataframe['measureland_qualifier_flag_visual'] = 1
     else:
         invalid_times = get_list_block_time_periods(invalid_position_filepath)
 
         # Assume the data point is good unless it has been flagged visually.
-        dataframe['measureland_qualifier_flag_visual'] = '2'
+        dataframe['measureland_qualifier_flag_visual'] = 1
 
-        # Where the data point is recognised as being bad visually, flag it as bad data.
+        # Where the data point is recognised as being bad visually, flag it as probably bad data.
         for invalid_time in invalid_times:
             mask = (dataframe['date_time'] >= invalid_time[0]) & (dataframe['date_time'] <= invalid_time[1])
-            dataframe.loc[mask, 'measureland_qualifier_flag_visual'] = 5
+            dataframe.loc[mask, 'measureland_qualifier_flag_visual'] = 3
 
     return dataframe
 
@@ -540,14 +540,14 @@ def calculate_measureland_qualifier_flag_overall(row):
 
     #print("Computing overall measureland qualifier flags")
 
-    if row['measureland_qualifier_flag_speed'] == 5 or row['measureland_qualifier_flag_course'] ==5 or row['measureland_qualifier_flag_acceleration'] ==5 or row['measureland_qualifier_flag_visual'] == 5:
-        return 5
-    elif row['measureland_qualifier_flag_speed'] == 1 and row['measureland_qualifier_flag_course'] == 1 and row['measureland_qualifier_flag_acceleration'] == 1 and row['measureland_qualifier_flag_visual'] == 1:
-        return 1
-    elif (row['measureland_qualifier_flag_speed'] == 3 or row['measureland_qualifier_flag_course'] == 3 or row['measureland_qualifier_flag_acceleration'] == 3) and (row['measureland_qualifier_flag_speed'] != 5 or row['measureland_qualifier_flag_course'] != 5 or row['measureland_qualifier_flag_acceleration'] != 5):
-        return 3
+    if row['measureland_qualifier_flag_speed'] == 3 or row['measureland_qualifier_flag_distance'] == 3 or row['measureland_qualifier_flag_course'] == 3 or row['measureland_qualifier_flag_acceleration'] == 3 or row['measureland_qualifier_flag_visual'] == 3:
+        return 3 # bad value
+    elif row['measureland_qualifier_flag_speed'] == 1 and row['measureland_qualifier_flag_distance'] == 1 and row['measureland_qualifier_flag_course'] == 1 and row['measureland_qualifier_flag_acceleration'] == 1 and row['measureland_qualifier_flag_visual'] == 1:
+        return 1 # good value
+    # elif (row['measureland_qualifier_flag_speed'] == 3 or row['measureland_qualifier_flag_course'] == 3 or row['measureland_qualifier_flag_acceleration'] == 3) and (row['measureland_qualifier_flag_speed'] != 5 or row['measureland_qualifier_flag_course'] != 5 or row['measureland_qualifier_flag_acceleration'] != 5):
+    #     return 3
     else:
-        return 2
+        return 2 # probably good value
 
 
 def combine_position_dataframes(dataframe1, dataframe2):

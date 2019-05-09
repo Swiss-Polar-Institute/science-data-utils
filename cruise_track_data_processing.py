@@ -37,12 +37,12 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     print(track_df.info())
     print(track_df['speed'].head(10))
     print(track_df['distance'].head(10))
-   # track_df = cruise_track_data_processing_utils.analyse_speed(track_df)
+    track_df = cruise_track_data_processing_utils.analyse_speed(track_df)
     track_df = cruise_track_data_processing_utils.analyse_distance_between_points(track_df)
 
-    print(track_df['measureland_qualifier_flag_speed'].head(10))
-    print(track_df['measureland_qualifier_flag_distance'].head(10))
-    print(track_df['distance'].head(100))
+    #print(track_df['measureland_qualifier_flag_speed'].head(10))
+    #print(track_df['measureland_qualifier_flag_distance'].head(10))
+    #print(track_df['distance'].head(100))
 
     # Check the course of the ship throughout the track to ensure it is not making impossible turns or accelerating impossibly fast. Flag data points.
     (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error) = cruise_track_data_processing_utils.analyse_course(track_df)
@@ -55,10 +55,22 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
 
     print(track_df.dtypes)
 
+    # Check values of all qualifier flags to make sure they have been assigned correctly:
+    print("looking at qualifier flag values for all MQFs:")
+    print("Speed:", track_df['measureland_qualifier_flag_speed'].value_counts())
+    print("Distance:", track_df['measureland_qualifier_flag_distance'].value_counts())
+    print("Course:", track_df['measureland_qualifier_flag_course'].value_counts())
+    print("Acceleration:", track_df['measureland_qualifier_flag_acceleration'].value_counts())
+    print("Visual:", track_df['measureland_qualifier_flag_visual'].value_counts())
+
     # Calculate an overall quality flag, taking into account all of the factors tested above.
+    print("Calculating overall measureand qualifier flag from individual ones.")
     track_df['measureland_qualifier_flag_overall'] = track_df.apply(cruise_track_data_processing_utils.calculate_measureland_qualifier_flag_overall, axis=1)
     track_df['measureland_qualifier_flag_overall'] = track_df['measureland_qualifier_flag_overall'].astype('int8')
-    print("Dataframe with overall quality flag: ", track_df.head(10))
+    #print("Dataframe with overall quality flag: ", track_df.head(10))
+
+    print("OVERALL:", track_df['measureland_qualifier_flag_overall'].value_counts())
+
 
     # Output the data files where they have been flagged to show the intermediate steps and flagging.
     cruise_track_data_processing_utils.output_daily_files(track_df, output_flagging_filepath, output_flagging_filename)
@@ -75,6 +87,8 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     pivottable_course = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_course')
     pivottable_acceleration = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_acceleration')
     pivottable_visual = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_visual')
+    pivottable_visual = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_overall')
+
 
     return track_df
 
