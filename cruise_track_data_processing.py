@@ -50,10 +50,10 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
     print("Number of acceleration errors: ", count_acceleration_errors)
     print("Number of bearing errors when the ship is stationary: ", count_ship_stationary_bearing_error)
 
-    print(track_df.dtypes)
-
     # Flag the points where the track has been manually and visually identified as incorrect.
     track_df = cruise_track_data_processing_utils.update_visual_position_flag(track_df, invalid_position_filepath)
+
+    print(track_df.dtypes)
 
     # Calculate an overall quality flag, taking into account all of the factors tested above.
     track_df['measureland_qualifier_flag_overall'] = track_df.apply(cruise_track_data_processing_utils.calculate_measureland_qualifier_flag_overall, axis=1)
@@ -71,8 +71,10 @@ def process_track_data(dataframe_name, concatenated_filepath, concatenated_filen
 
     # Calculate statistics of qualifier flags
     pivottable_speed = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_speed')
+    pivottable_distance = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_distance')
     pivottable_course = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_course')
     pivottable_acceleration = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_acceleration')
+    pivottable_visual = cruise_track_data_processing_utils.create_pivottable_on_flag(dataframe_name, track_df, 'measureland_qualifier_flag_visual')
 
     return track_df
 

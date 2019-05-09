@@ -506,7 +506,7 @@ def get_list_block_time_periods(filename_time_periods):
                 time_ending = datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S")
 
                 time_periods.append((time_beginning, time_ending, row[2]))
-        print("List of time periods: ", time_periods)
+        #print("List of time periods: ", time_periods)
 
         get_list_block_time_periods.cached[filename_time_periods] = time_periods
 
