@@ -268,7 +268,7 @@ def calculate_speed(position_df):
     current_date = earliest_date_time
 
     previous_position = get_location(earliest_date_time, position_df)
-    print("Previous position: ", previous_position)
+    #print("Previous position: ", previous_position)
     #datetime_previous, latitude_previous, longitude_previous = previous_position
 
     # count_speed_errors = 0
@@ -336,19 +336,20 @@ def analyse_distance_between_points(position_df):
     position_df.loc[position_df['distance'].apply(math.isnan), 'measureland_qualifier_flag_distance'] = 9 # missing values
     print("Rows where the distance is null: ", position_df.loc[position_df['distance'].apply(math.isnan)])
 
+    # good data
+    print("Flagging good data distance")
+    position_df.loc[abs(position_df['distance']) > maximum_distance, 'measureland_qualifier_flag_distance'] = 1 # good values
+
     # bad data
     print("Flagging bad data distance")
     position_df.loc[abs(position_df['distance']) <= maximum_distance, 'measureland_qualifier_flag_distance'] = 3 # probably bad values
 
-    # good data
-    print("Flagging good data distance")
+    in_port_periods = get_list_block_time_periods("/home/jen/projects/ace_data_management/wip/cruise_track_data/in_port.csv")
 
-    sailing_periods = get_list_block_time_periods("/home/jen/projects/ace_data_management/wip/cruise_track_data/sailing.csv")
+    for in_port_period in in_port_periods:
+        #print("Periods ship was in port: ", in_port_period[0], in_port_period[1])
 
-    for sailing_period in sailing_periods:
-        print(sailing_period[0], sailing_period[1])
-
-        position_df.loc[(abs(position_df['distance']) > maximum_distance) & (sailing_period[0] < position_df['date_time']) & (position_df['date_time'] < sailing_period[1]), 'measureland_qualifier_flag_distance'] = 1 # good values
+        position_df.loc[(abs(position_df['distance']) <= maximum_distance) & (in_port_period[0] < position_df['date_time']) & (position_df['date_time'] < in_port_period[1]), 'measureland_qualifier_flag_distance'] = 1 # good values
 
     position_df['measureland_qualifier_flag_distance'] = position_df['measureland_qualifier_flag_distance'].astype(int)
 
