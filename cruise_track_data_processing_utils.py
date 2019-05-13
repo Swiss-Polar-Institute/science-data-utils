@@ -398,12 +398,12 @@ def analyse_course(position_df):
     previous_position = get_location(earliest_date_time, position_df)
     datetime_previous, latitude_previous, longitude_previous = previous_position
 
-    previous_bearing = 0
+    #previous_bearing = 0
     previous_speed_knots = 0
 
-    count_bearing_errors = 0
+    #count_bearing_errors = 0
     count_acceleration_errors = 0
-    count_ship_stationary_bearing_error = 0 # ship at speed <= 0.3 and bearing tight.
+    #count_ship_stationary_bearing_error = 0 # ship at speed <= 0.3 and bearing tight.
 
     line_number = -1
     for position in position_df.itertuples():
@@ -411,15 +411,15 @@ def analyse_course(position_df):
         row_index = position[0]
 
         if line_number == 0:
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # assume good value
+            #position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # assume good value
             position_df.at[row_index, 'measureland_qualifier_flag_acceleration'] = 1 # assume good value
             continue
 
         current_position = position[2:5]
 
         # Calculate bearing and change in bearing
-        current_bearing = calculate_bearing(previous_position, current_position)
-        difference_in_bearing = calculate_bearing_difference(current_bearing, previous_bearing)
+        #current_bearing = calculate_bearing(previous_position, current_position)
+        #difference_in_bearing = calculate_bearing_difference(current_bearing, previous_bearing)
 
         # Calculate acceleration between two points
         current_conditions = knots_two_points(previous_position, current_position)
@@ -437,19 +437,19 @@ def analyse_course(position_df):
         error_message_bearing = ""
         error_message_acceleration = ""
 
-        if abs(difference_in_bearing) == "N/A":
-            error_message_bearing = "No bearing?"
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 9 # missing values
-        elif abs(difference_in_bearing) >= 10 and current_speed_knots > 0.3:
-            error_message_bearing = "** Turn too tight **"
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 3 # probably bad value
-            count_bearing_errors += 1
-        elif abs(difference_in_bearing) >= 10 and current_speed_knots <= 0.3:
-            error_message_bearing = "** Turn tight but ship stationary **"
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2 # probably good value
-            count_ship_stationary_bearing_error += 1
-        elif abs(difference_in_bearing) < 10:
-            position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # good value
+        # if abs(difference_in_bearing) == "N/A":
+        #     error_message_bearing = "No bearing?"
+        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 9 # missing values
+        # elif abs(difference_in_bearing) >= 10 and current_speed_knots > 0.3:
+        #     error_message_bearing = "** Turn too tight **"
+        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 3 # probably bad value
+        #     count_bearing_errors += 1
+        # elif abs(difference_in_bearing) >= 10 and current_speed_knots <= 0.3:
+        #     error_message_bearing = "** Turn tight but ship stationary **"
+        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2 # probably good value
+        #     count_ship_stationary_bearing_error += 1
+        # elif abs(difference_in_bearing) < 10:
+        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # good value
 
         # if error_message_bearing != "":
         #     print("Previous: ", previous_position)
@@ -481,14 +481,15 @@ def analyse_course(position_df):
         #                                                                         current_position[2], acceleration))
 
         previous_position = current_position
-        previous_bearing = current_bearing
+        #previous_bearing = current_bearing
         previous_speed_knots = current_speed_knots
 
-    position_df['measureland_qualifier_flag_course'] = position_df['measureland_qualifier_flag_course'].astype(int)
+    #position_df['measureland_qualifier_flag_course'] = position_df['measureland_qualifier_flag_course'].astype(int)
     position_df['measureland_qualifier_flag_acceleration'] = position_df['measureland_qualifier_flag_acceleration'].astype(int)
 
-    return (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error)
+    #return (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error)
 
+    return (count_acceleration_errors)
 
 def get_list_block_time_periods(filename_time_periods):
     """Get a file containing start and end times of blocks of times to be applied to the data (such as from visually marked errors, or when the ship is in port) and create a list of these."""
@@ -540,7 +541,8 @@ def calculate_measureland_qualifier_flag_overall(row):
     """Calculate the overall data quality flag taking into account the others that have been assigned."""
 
     mqf_tuple = (row['measureland_qualifier_flag_speed'], row['measureland_qualifier_flag_distance'],
-                 row['measureland_qualifier_flag_course'], row['measureland_qualifier_flag_acceleration'],
+                 #row['measureland_qualifier_flag_course'],
+                 row['measureland_qualifier_flag_acceleration'],
                  row['measureland_qualifier_flag_visual'])
 
     if mqf_tuple.count(3) >= 1:
@@ -585,7 +587,11 @@ def combine_position_dataframes(dataframe1, dataframe2):
 def remove_intermediate_columns(dataframe):
     """Remove the intermediate step qualifier flag columns that are not required in the final output data set."""
 
-    combined_dataframe_dropped_cols = dataframe.drop(columns = ['measureland_qualifier_flag_speed', 'measureland_qualifier_flag_course', 'measureland_qualifier_flag_acceleration', 'measureland_qualifier_flag_visual'])
+    combined_dataframe_dropped_cols = dataframe.drop(columns = ['measureland_qualifier_flag_speed',
+                                                                #'measureland_qualifier_flag_course',
+                                                                'measureland_qualifier_flag_distance',
+                                                                'measureland_qualifier_flag_acceleration',
+                                                                'measureland_qualifier_flag_visual'])
 
     print("Dimensions of combined dataframe after dropping columns:", combined_dataframe_dropped_cols.shape)
     print("Combined dataframe after dropping columns: ", combined_dataframe_dropped_cols.sample(10))
@@ -599,26 +605,26 @@ def choose_rows(rows):
     # Ensure that the object is not empty.
     assert(len(rows) > 0)
 
-    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality. If the data quality is not good, then do not select, even if there is no other point for that time.
-    if len(rows) >= 1 and rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality (1 = good value, 2 = probably good value). If the data quality is not good, then do not select, even if there is no other point for that time. We are only interested in the good data at this point.
+    if len(rows) >= 1 and rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 1:
         return rows[0]
 
-    elif len(rows) >=2 and rows[1]['device_id'] == 64 and rows[1]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >=2 and rows[1]['device_id'] == 64 and rows[1]['measureland_qualifier_flag_overall'] == 1:
         return rows[1]
 
-    elif len(rows) >= 3 and rows[2]['device_id'] == 64 and rows[2]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >= 3 and rows[2]['device_id'] == 64 and rows[2]['measureland_qualifier_flag_overall'] == 1:
         return rows[2]
 
-    elif len(rows) >= 1 and rows[0]['device_id'] == 63 and rows[0]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >= 1 and rows[0]['device_id'] == 63 and rows[0]['measureland_qualifier_flag_overall'] == 1:
         return rows[0]
 
-    elif len(rows) >=2 and rows[1]['device_id'] == 63 and rows[1]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >=2 and rows[1]['device_id'] == 63 and rows[1]['measureland_qualifier_flag_overall'] == 1:
         return rows[1]
 
-    elif len(rows) >= 3 and rows[2]['device_id'] == 63 and rows[2]['measureland_qualifier_flag_overall'] == 2:
+    elif len(rows) >= 3 and rows[2]['device_id'] == 63 and rows[2]['measureland_qualifier_flag_overall'] == 1:
         return rows[2]
 
-    elif len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 3: # for the first row which has a value of 3, because QC was not able to tell otherwise
+    elif len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2: # for the first row which has a value of 3, because QC was not able to tell otherwise
         return rows[0]
 
     return None
@@ -661,7 +667,8 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
         print("Output file opened")
 
     writer = csv.writer(f, delimiter=',')
-    writer.writerow(['date_time','latitude','longitude','fix_quality','number_satellites','horiz_dilution_of_position','altitude','altitude_units','geoid_height','geoid_height_units','device_id','speed','measureland_qualifier_flag_overall'])
+    writer.writerow(['date_time','latitude','longitude','fix_quality','number_satellites','horiz_dilution_of_position',
+                     'altitude','altitude_units','geoid_height','geoid_height_units','device_id','speed','measureland_qualifier_flag_overall'])
 
     selected_count = 0
     non_selected_count = 0
@@ -680,25 +687,27 @@ def prioritise_data_points(dataframe, output_filepath, output_filename):
             #print("Type:", rows_pending_decision())
             count_rows = 0
             length_selection = len(rows_pending_decision)
-            print("-------------------Rows to choose from--------------: (Total = ", length_selection, ")")
+            #print("-------------------Rows to choose from--------------: (Total = ", length_selection, ")")
             selected_row = choose_rows(rows_pending_decision)
             for item in rows_pending_decision:
                 #print("Counting rows: ", count_rows)
-                print("Row number: ", count_rows, " Here is the row\n", rows_pending_decision[count_rows][[2,3,4, 12,15, 16]])
-                print("Row length: ", len(rows_pending_decision[count_rows]))
+                #print("Row number: ", count_rows, " \n --Here is the row--\n", rows_pending_decision[count_rows][[1, 2, 3, 14, 15, 16]])
+                #print("Row length: ", len(rows_pending_decision[count_rows]))
                 count_rows += 1
 
             if selected_row is not None:
                 # write the selected row out to the file rather than appending it to the dataframe
-                print(type(selected_row))
+                # print(type(selected_row))
 
                 convert_float_nan_to_string_NaN(selected_row)
-                writer.writerow(selected_row[2:16])
-                print("-----selected row: \n", selected_row)
-                print("-----Selected row: \n", selected_row[[2, 3, 4, 12, 15, 16]])
+                # selected_row['date_time'] = selected_row['date_time'].strftime('%Y-%m-%d %H:%M:%S.%f')
+                selected_row['date_time'] = '{}.{}+00:00'.format(selected_row['date_time'].strftime('%Y-%m-%dT%H:%M:%S'), selected_row['date_time'].strftime('%f')[0:2])
+                writer.writerow([*selected_row[1:12], selected_row[14], selected_row[16]])
+                #print("-----selected row: \n", selected_row)
+                #print("-----Selected row: \n", selected_row[[1, 2, 3, 13, 14, 15, 16]])
                 selected_count += 1
             else:
-                print("Rows of poor quality data, nothing selected")
+                #print("Rows of poor quality data, nothing selected")
                 non_selected_count += 1
 
             rows_pending_decision = []
