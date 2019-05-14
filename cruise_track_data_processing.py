@@ -275,7 +275,7 @@ def main():
     output_create_files_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_create_files_filename_glonass = 'ace_glonass'
 
-    invalid_position_filepath_glonass = ''
+    invalid_position_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/ace_glonass_manual_position_errors.csv'
 
     output_flagging_filepath_glonass = '/home/jen/projects/ace_data_management/wip/cruise_track_data/'
     output_flagging_filename_glonass = 'flagging_data_ace_glonass'
