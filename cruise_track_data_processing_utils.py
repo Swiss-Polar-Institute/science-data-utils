@@ -71,12 +71,13 @@ def create_header_from_file(file_list):
     return header
 
 
-def get_data_from_csv(filepath, filename, datatypes):
-    """Get data from a csv file. In the processing this is used for getting data from the concatenated csv file but can be used for any. Write it into a pandas dataframe."""
+def get_data_from_csv(filepath, filename, datatypes, date_column_list):
+    """Get data from a csv file. In the processing this is used for getting data from the concatenated csv file but can be used for any.
+    Write it into a pandas dataframe.date_column_list should be [1, 19] or similar, with the index of the columns that should be converted to dates"""
 
-    concatenated_file = filepath + "/" + filename
+    concatenated_file = os.path.join(filepath, filename)
 
-    dataframe = pandas.read_csv(concatenated_file, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=[1, 19])
+    dataframe = pandas.read_csv(concatenated_file, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=date_column_list)
 
     return dataframe
 
