@@ -3,6 +3,7 @@ import os
 import datetime
 import cruise_track_data_processing_utils
 import matplotlib.pyplot as plt
+import glob
 
 def investigate_aggregation_by_time(dataframe):
     """investigate approximately how many rows to expect when the dataset is aggregated to minute and hour resolution.
@@ -62,13 +63,13 @@ def output_dataframe_to_csv(dataframe, columns, output_filepath, output_filename
     dataframe.to_csv(output_file, index=False, columns=columns)
 
 
-def plot_aggregated_data_separate_graphs(dataframe_min, dataframe_hour):
+def plot_aggregated_data_separate_graphs(dataframe_min, dataframe_hour, month):
     """Plot the data on separate graphs."""
 
     # Plot one minute resolution data
     plt.subplot(211)
     plt.scatter(dataframe_min.longitude, dataframe_min.latitude, c="red")
-    plt.title("One-minute resolution")
+    plt.title("One-minute resolution: "+ month)
     plt.xlabel("Longitude, decimal degrees E")
     plt.ylabel("Latitude, decimal degrees N")
     plt.grid(True)
@@ -77,7 +78,7 @@ def plot_aggregated_data_separate_graphs(dataframe_min, dataframe_hour):
     # Plot one hour resolution data
     plt.subplot(212)
     plt.scatter(dataframe_hour.longitude, dataframe_hour.latitude, c="red")
-    plt.title("One-hour resolution")
+    plt.title("One-hour resolution: "+ month)
     plt.xlabel("Longitude, decimal degrees E")
     plt.ylabel("Latitude, decimal degrees N")
     plt.grid(True)
@@ -87,13 +88,13 @@ def plot_aggregated_data_separate_graphs(dataframe_min, dataframe_hour):
     plt.show()
 
 
-def plot_aggregated_data_same_axes(dataframe_min, dataframe_hour):
+def plot_aggregated_data_same_axes(dataframe_min, dataframe_hour, month):
     """Plot aggregated data from two different dataframes on the same axes. """
 
     fig, ax = plt.subplots()
 
-    dataframe_min.plot(x='latitude', y='longitude', ax=ax, legend=True, label='Minute')
-    dataframe_hour.plot(x='latitude', y='longitude', ax=ax, legend=True, label='Hour')
+    dataframe_min.plot(x='longitude', y='latitude', ax=ax, legend=True, label='Minute', title= month)
+    dataframe_hour.plot(x='longitude', y='latitude', ax=ax, legend=True, label='Hour', title=month)
 
     plt.show()
 
@@ -108,11 +109,14 @@ def check_aggregation_output(dataframe):
     print("Number of rows with 0 seconds, group by minutes: ", subset_sec_df.groupby(['time_minutes'])[['time_minutes']].count())
 
 
-def main():
+def process_aggregation(month):
+    """ Process the aggregation for each month of data that exists.
+    month is in format 2016-12
+    """
 
     # input variables
     filepath = "/home/jen/projects/ace_data_management/wip/cruise_track_data"
-    one_sec_resolution_filename = "track_data_prioritised_2016-12.csv"
+    one_sec_resolution_filename = "ace_cruise_track_1sec_{}.csv".format(month)
     date_column_list = [0]
     
     datatypes = { 'latitude': 'float64',
@@ -128,8 +132,8 @@ def main():
                   'speed': 'float64',
                   'measureland_qualifier_flags_overall': 'int8'}
 
-    output_filename_minute = "TEST_ace_cruise_track_1min.csv"
-    output_filename_hour = "TEST_ace_cruise_track_1hour.csv"
+    output_filename_minute = "ace_cruise_track_1min_{}.csv".format(month)
+    output_filename_hour = "ace_cruise_track_1hour_{}.csv".format(month)
     columns = ['date_time', 'latitude', 'longitude', 'fix_quality', 'number_satellites', 'horiz_dilution_of_position',
                'altitude', 'altitude_units', 'geoid_height', 'geoid_height_units', 'device_id', 'speed', 'measureland_qualifier_flag_overall']
 
@@ -150,12 +154,20 @@ def main():
     output_dataframe_to_csv(hour_res_df, columns, filepath, output_filename_hour)
 
     # do plots and checking of output aggregations
-    plot_aggregated_data_separate_graphs(minute_res_df, hour_res_df)
+    plot_aggregated_data_separate_graphs(minute_res_df, hour_res_df, month)
 
-    plot_aggregated_data_same_axes(minute_res_df, hour_res_df)
+    plot_aggregated_data_same_axes(minute_res_df, hour_res_df, month)
 
     check_aggregation_output(second_res_df)
 
+
+def main():
+
+    # list of months that should be processed
+    months_to_be_processed = ["2016-12", "2017-01", "2017-02", "2017-03", "2017-04"]
+
+    for month in months_to_be_processed:
+        process_aggregation(month)
 
 if __name__ == "__main__":
     main()
