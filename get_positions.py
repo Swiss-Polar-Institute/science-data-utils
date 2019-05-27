@@ -2,6 +2,7 @@ import csv
 import pandas
 import glob
 import cruise_track_data_processing_utils
+import aggregate_lower_resolution
 
 
 def get_position_data(file):
@@ -76,16 +77,40 @@ def process_get_positions():
 
     one_min_res_position_df = get_all_positions(filepath_position, one_min_res_filename)
 
-    # input variables - dates/times in csv file
     filepath_dates = "/home/jen/projects/ace_data_management/data_to_archive_post_cruise/project13/genoscope_work"
-    filename_dates = "dates_times.csv"
 
-    dates_df = get_list_dates(filepath_dates, filename_dates)
-    #print(dates_df.head(10))
-    #print(dates_df.dtypes)
+    # START TIMES
+    # input variables - dates/times in csv file
+    filename_dates_start = "dates_times_start.csv"
 
-    position_df = merge_dfs(dates_df, one_min_res_position_df, "date_time")
-    print(position_df.head(10))
+    start_dates_df = get_list_dates(filepath_dates, filename_dates_start)
+
+    start_position_df = merge_dfs(start_dates_df, one_min_res_position_df, "date_time")
+    print(start_position_df.head(10))
+
+    # output the dataframe to a csv file
+    output_filepath = "/home/jen/projects/ace_data_management/data_to_archive_post_cruise/project13/genoscope_work/"
+    output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
+    start_output_filename = 'datetime_position_matched_start.csv'
+
+    aggregate_lower_resolution.output_dataframe_to_csv(start_position_df, output_columns, output_filepath, start_output_filename)
+
+    # END TIMES
+    # input variables - dates/times in csv file
+    filename_dates_end = "dates_times_end.csv"
+
+    end_dates_df = get_list_dates(filepath_dates, filename_dates_end)
+
+    end_position_df = merge_dfs(end_dates_df, one_min_res_position_df, "date_time")
+
+    # output the dataframe to a csv file
+    output_filepath = "/home/jen/projects/ace_data_management/data_to_archive_post_cruise/project13/genoscope_work/"
+    output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
+    end_output_filename = 'datetime_position_matched_end.csv'
+
+    aggregate_lower_resolution.output_dataframe_to_csv(end_position_df, output_columns, output_filepath,
+                                                       end_output_filename)
+
 
 def main():
 
