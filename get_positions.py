@@ -31,22 +31,22 @@ def get_position_data(file):
     return position_df
 
 
-def get_all_positions(filepath_position, one_min_res_filename):
+def get_all_positions(filepath_position, filename_position):
     #file_names = filepath_position + one_min_res_filename
-    all_min_files = glob.glob(filepath_position + one_min_res_filename)
+    all_min_files = glob.glob(filepath_position + filename_position)
 
     #print(all_min_files)
-    files = []
+    position_dfs = []
 
     for file in all_min_files:
         position_df = get_position_data(file)
-        files.append(position_df)
+        position_dfs.append(position_df)
 
-    one_min_res_position_df = pandas.concat(files)
+    res_position_df = pandas.concat(position_dfs)
     #print(one_min_res_position_df.head(10))
-    print(one_min_res_position_df.dtypes)
+    print(res_position_df.dtypes)
 
-    return one_min_res_position_df
+    return res_position_df
 
 
 def get_list_dates(filepath, filename):
@@ -61,6 +61,14 @@ def get_list_dates(filepath, filename):
     return dates_df
 
 
+def convert_datetime(date_time):
+
+    #pandas.to_datetime(date_time, format='%Y-%m-%d %H:%M:%S')
+    date_time_rounded = date_time.replace(microsecond=0)
+
+    return date_time_rounded
+
+
 def merge_dfs(df1, df2, column_name):
 
     df3 = pandas.merge(df1, df2, how='left', on=column_name)
@@ -73,11 +81,11 @@ def process_get_positions():
     # input variables - position data
     filepath_position = "/home/jen/projects/ace_data_management/wip/cruise_track_data/"
 
-    one_min_res_filename = "ace_cruise_track_1min_*.csv"
+    one_sec_res_filename = "ace_cruise_track_1sec_*.csv"
 
-    one_min_res_position_df = get_all_positions(filepath_position, one_min_res_filename)
+    one_sec_res_position_df = get_all_positions(filepath_position, one_sec_res_filename)
 
-    filepath_dates = "/home/jen/projects/ace_data_management/data_to_archive_post_cruise/project13/genoscope_work"
+    filepath_dates = "/home/jen/projects/ace_data_management/coordinates/all_events/"
 
     # START TIMES
     # input variables - dates/times in csv file
@@ -85,11 +93,13 @@ def process_get_positions():
 
     start_dates_df = get_list_dates(filepath_dates, filename_dates_start)
 
-    start_position_df = merge_dfs(start_dates_df, one_min_res_position_df, "date_time")
+    one_sec_res_position_df['date_time'] = one_sec_res_position_df['date_time'].apply(convert_datetime)
+
+    start_position_df = merge_dfs(start_dates_df, one_sec_res_position_df, "date_time")
     print(start_position_df.head(10))
 
     # output the dataframe to a csv file
-    output_filepath = "/home/jen/projects/ace_data_management/data_to_archive_post_cruise/project13/genoscope_work/"
+    output_filepath = "/home/jen/projects/ace_data_management/coordinates/all_events/"
     output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
     start_output_filename = 'datetime_position_matched_start.csv'
 
@@ -101,10 +111,10 @@ def process_get_positions():
 
     end_dates_df = get_list_dates(filepath_dates, filename_dates_end)
 
-    end_position_df = merge_dfs(end_dates_df, one_min_res_position_df, "date_time")
+    end_position_df = merge_dfs(end_dates_df, one_sec_res_position_df, "date_time")
 
     # output the dataframe to a csv file
-    output_filepath = "/home/jen/projects/ace_data_management/data_to_archive_post_cruise/project13/genoscope_work/"
+    output_filepath = "/home/jen/projects/ace_data_management/coordinates/all_events/"
     output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
     end_output_filename = 'datetime_position_matched_end.csv'
 
