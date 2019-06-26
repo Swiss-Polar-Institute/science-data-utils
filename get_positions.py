@@ -3,6 +3,7 @@ import pandas
 import glob
 import cruise_track_data_processing_utils
 import aggregate_lower_resolution
+import argparse
 
 
 def get_position_data(file):
@@ -76,7 +77,7 @@ def merge_dfs(df1, df2, column_name):
     return df3
 
 
-def process_get_positions():
+def process_get_positions(date_time_filepath, lat_lon_resolution, outfile_path):
 
     # input variables - position data
     filepath_position = "/home/jen/projects/ace_data_management/wip/cruise_track_data/"
@@ -85,7 +86,7 @@ def process_get_positions():
 
     one_sec_res_position_df = get_all_positions(filepath_position, one_sec_res_filename)
 
-    filepath_dates = "/home/jen/projects/ace_data_management/coordinates/all_events/"
+    filepath_dates = "/home/jen/projects/ace_data_management/coordinates/humics/"
 
     # START TIMES
     # input variables - dates/times in csv file
@@ -99,34 +100,21 @@ def process_get_positions():
     print(start_position_df.head(10))
 
     # output the dataframe to a csv file
-    output_filepath = "/home/jen/projects/ace_data_management/coordinates/all_events/"
+    output_filepath = "/home/jen/projects/ace_data_management/coordinates/humics/"
     output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
     start_output_filename = 'datetime_position_matched_start.csv'
 
     aggregate_lower_resolution.output_dataframe_to_csv(start_position_df, output_columns, output_filepath, start_output_filename)
 
-    # END TIMES
-    # input variables - dates/times in csv file
-    filename_dates_end = "dates_times_end.csv"
-
-    end_dates_df = get_list_dates(filepath_dates, filename_dates_end)
-
-    end_position_df = merge_dfs(end_dates_df, one_sec_res_position_df, "date_time")
-
-    # output the dataframe to a csv file
-    output_filepath = "/home/jen/projects/ace_data_management/coordinates/all_events/"
-    output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
-    end_output_filename = 'datetime_position_matched_end.csv'
-
-    aggregate_lower_resolution.output_dataframe_to_csv(end_position_df, output_columns, output_filepath,
-                                                       end_output_filename)
-
-
-def main():
-
-    process_get_positions()
 
 if __name__ == "__main__":
-        main()
+    parser = argparse.ArgumentParser(description="Ouptut into a file, the latitude and longitude for a given date and time where these are listed in an input file.")
+    parser.add_argument("date_time_filepath", help="Full file path and filename of the file containing the dates and times")
+    parser.add_argument("lat_lon_resolution", type=str, choices=("second", "minute", "hour"), help="Select the resolution of the position data would you like to use.")
+    parser.add_argument("output_filepath", help="Full filepath and filename of output file")
+
+    args = parser.parse_args()
+
+    process_get_positions(args.date_time_filepath, args.lat_lon_resolution)
 
 
