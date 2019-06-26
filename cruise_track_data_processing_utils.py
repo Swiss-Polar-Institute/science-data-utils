@@ -77,7 +77,16 @@ def get_data_from_csv(filepath, filename, datatypes, date_column_list):
 
     concatenated_file = os.path.join(filepath, filename)
 
-    dataframe = pandas.read_csv(concatenated_file, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=date_column_list)
+    dataframe = get_data_from_csv_full_path(concatenated_file, datatypes, date_column_list)
+
+    return dataframe
+
+
+def get_data_from_csv_full_path(filepath, datatypes, date_column_list):
+    """Get data from a csv file. In the processing this is used for getting data from the concatenated csv file but can be used for any.
+    Write it into a pandas dataframe.date_column_list should be [1, 19] or similar, with the index of the columns that should be converted to dates"""
+
+    dataframe = pandas.read_csv(filepath, dtype=datatypes, date_parser=pandas.to_datetime, parse_dates=date_column_list)
 
     return dataframe
 

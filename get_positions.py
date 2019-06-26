@@ -4,6 +4,7 @@ import glob
 import cruise_track_data_processing_utils
 import aggregate_lower_resolution
 import argparse
+import os
 
 
 def get_position_data(file):
@@ -32,30 +33,31 @@ def get_position_data(file):
     return position_df
 
 
-def get_all_positions(filepath_position, filename_position):
-    #file_names = filepath_position + one_min_res_filename
-    all_min_files = glob.glob(filepath_position + filename_position)
+def get_all_positions(lat_lon_filepath, lat_lon_resolution):
 
-    #print(all_min_files)
+    lat_lon_filename = 'ace_cruise_track_1'
+    path = os.path.join(lat_lon_filepath, lat_lon_filename)
+
+    all_position_files = glob.glob(path + lat_lon_resolution + "*.csv")
+
     position_dfs = []
 
-    for file in all_min_files:
+    for file in all_position_files:
         position_df = get_position_data(file)
         position_dfs.append(position_df)
 
     res_position_df = pandas.concat(position_dfs)
-    #print(one_min_res_position_df.head(10))
     print(res_position_df.dtypes)
 
     return res_position_df
 
 
-def get_list_dates(filepath, filename):
+def get_list_dates(filepath):
     date_column_list = [0]
 
     datatypes = {}
 
-    dates_df = cruise_track_data_processing_utils.get_data_from_csv(filepath, filename, datatypes, date_column_list)
+    dates_df = cruise_track_data_processing_utils.get_data_from_csv_full_path(filepath, datatypes, date_column_list)
 
     print("Number of rows in dates file: ", len(dates_df))
 
@@ -77,44 +79,34 @@ def merge_dfs(df1, df2, column_name):
     return df3
 
 
-def process_get_positions(date_time_filepath, lat_lon_resolution, outfile_path):
+def process_get_positions(date_time_filepath, lat_lon_filepath, lat_lon_resolution, output_filepath, output_filename):
 
-    # input variables - position data
-    filepath_position = "/home/jen/projects/ace_data_management/wip/cruise_track_data/"
+    input_position_df = get_all_positions(lat_lon_filepath, lat_lon_resolution)
 
-    one_sec_res_filename = "ace_cruise_track_1sec_*.csv"
+    dates_df = get_list_dates(date_time_filepath)
 
-    one_sec_res_position_df = get_all_positions(filepath_position, one_sec_res_filename)
+    input_position_df['date_time'] = input_position_df['date_time'].apply(convert_datetime)
 
-    filepath_dates = "/home/jen/projects/ace_data_management/coordinates/humics/"
+    matched_position_df = merge_dfs(dates_df, input_position_df, "date_time")
+    print(matched_position_df.head(10))
 
-    # START TIMES
-    # input variables - dates/times in csv file
-    filename_dates_start = "dates_times_start.csv"
-
-    start_dates_df = get_list_dates(filepath_dates, filename_dates_start)
-
-    one_sec_res_position_df['date_time'] = one_sec_res_position_df['date_time'].apply(convert_datetime)
-
-    start_position_df = merge_dfs(start_dates_df, one_sec_res_position_df, "date_time")
-    print(start_position_df.head(10))
-
-    # output the dataframe to a csv file
-    output_filepath = "/home/jen/projects/ace_data_management/coordinates/humics/"
+    # output the selected dataframe to a csv file
     output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
-    start_output_filename = 'datetime_position_matched_start.csv'
 
-    aggregate_lower_resolution.output_dataframe_to_csv(start_position_df, output_columns, output_filepath, start_output_filename)
+    aggregate_lower_resolution.output_dataframe_to_csv(matched_position_df, output_columns, output_filepath, output_filename)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ouptut into a file, the latitude and longitude for a given date and time where these are listed in an input file.")
     parser.add_argument("date_time_filepath", help="Full file path and filename of the file containing the dates and times")
-    parser.add_argument("lat_lon_resolution", type=str, choices=("second", "minute", "hour"), help="Select the resolution of the position data would you like to use.")
-    parser.add_argument("output_filepath", help="Full filepath and filename of output file")
+    parser.add_argument("lat_lon_filepath", help="Filepath to where the directory containing the position data files")
+    parser.add_argument("lat_lon_resolution", type=str, choices=("sec", "min", "hour"), help="Select the resolution of the position data would you like to use.")
+    parser.add_argument("output_filepath", help="Filepath to output file")
+    parser.add_argument("output_filename", help="Output filename")
+
 
     args = parser.parse_args()
 
-    process_get_positions(args.date_time_filepath, args.lat_lon_resolution)
+    process_get_positions(args.date_time_filepath, args.lat_lon_filepath, args.lat_lon_resolution, args.output_filepath, args.output_filename)
 
 
