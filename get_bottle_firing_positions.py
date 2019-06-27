@@ -65,6 +65,7 @@ def get_bottles_datetime(ctd_file):
 def write_to_file(output_file, bottle_date_time):
     with open(output_file, "w") as csvfile:
         csvwriter = csv.writer(csvfile)
+        csvwriter.writerow(['BTLNBR', 'date_time'])
 
         bottle_numbers = sorted(bottle_date_time.keys())
 
