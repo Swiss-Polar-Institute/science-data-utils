@@ -14,22 +14,18 @@ class DatetimeToPosition(object):
 
         self.sqlite3_cur = conn.cursor()
 
+        self.sqlite3_cur.execute("PRAGMA case_sensitive_like = 1")
+
     def datetime_datetime_to_position(self, datetime_datetime):
         return self.datetime_text_to_position(datetime_datetime.strftime("%Y-%m-%dT%H:%M:%S"))
 
     def datetime_text_to_position(self, datetime_text):
-        exact_match = datetime_text+".00+00:00"
-        self.sqlite3_cur.execute('SELECT latitude,longitude FROM gps WHERE date_time=?', (exact_match,))
+        approximation = datetime_text + "%"
+        self.sqlite3_cur.execute('SELECT latitude,longitude FROM gps where date_time like ?', (approximation, ))
 
         result = self.sqlite3_cur.fetchone()
 
         if result is None:
-            approximation = datetime_text + "%"
-            self.sqlite3_cur.execute('SELECT latitude,longitude FROM gps where date_time like ?', (approximation, ))
-
-            result = self.sqlite3_cur.fetchone()
-
-            if result is None:
-                return None
+            return None
 
         return float(result[0]), float(result[1])
