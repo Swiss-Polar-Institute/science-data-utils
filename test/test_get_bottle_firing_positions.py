@@ -12,6 +12,13 @@ class TestGetBottleFiringPositions(unittest.TestCase):
         self.assertEqual(bottles_date_time[1], datetime.datetime(2017, 12, 28, 12, 58, 22))
         self.assertEqual(bottles_date_time[2], datetime.datetime(2017, 12, 29, 11, 44, 33))
 
+    def test_read_bottles_date_time_one_column_less(self):
+        bottles_date_time = get_bottle_firing_positions.get_bottles_datetime("ctd-bottle-firing-one-less-column.btl")
+
+        self.assertEqual(len(bottles_date_time), 2)
+        self.assertEqual(bottles_date_time[1], datetime.datetime(2017, 12, 28, 12, 58, 22))
+        self.assertEqual(bottles_date_time[2], datetime.datetime(2017, 12, 29, 11, 44, 33))
+
     def test_write_to_file(self):
         bottles = {}
         bottles[1] = "2019-02-12 11:22:33"

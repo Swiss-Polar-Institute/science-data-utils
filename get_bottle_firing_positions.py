@@ -10,8 +10,6 @@ def list_without_empty_values(l):
     return list(filter(None, l))
 
 def get_bottles_datetime(ctd_file):
-    print("ctd_file", ctd_file)
-
     data_line_number = 0
 
     bottle_date_time = {}
@@ -41,16 +39,16 @@ def get_bottles_datetime(ctd_file):
             line_fields = list_without_empty_values(line_fields)
 
             len_line_fields = len(line_fields)
-            assert len_line_fields == 32 or len_line_fields == 23
+            assert len_line_fields == 32 or len_line_fields == 31 or len_line_fields == 22 or len_line_fields == 23
 
-            if len_line_fields == 32:
+            if len_line_fields == 31 or len_line_fields == 32:
                 current_bottle = {}
                 current_bottle['number'] = int(line_fields[0])
                 current_bottle['month'] = month_to_number[line_fields[1]]
                 current_bottle['day'] = int(line_fields[2])
                 current_bottle['year'] = int(line_fields[3])
 
-            if len_line_fields == 23:
+            if len_line_fields == 22 or len_line_fields == 23:
                 current_bottle['time'] = line_fields[0]
 
                 # Converts the bottle information to date_time
@@ -72,6 +70,8 @@ def write_to_file(output_file, bottle_date_time):
 
         for bottle_number in bottle_numbers:
             csvwriter.writerow([bottle_number, bottle_date_time[bottle_number]])
+
+    print("Ouput file generated in:", output_file)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Read CTD file")
