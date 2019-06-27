@@ -19,6 +19,12 @@ class TestGetBottleFiringPositions(unittest.TestCase):
         self.assertEqual(bottles_date_time[1], datetime.datetime(2017, 12, 28, 12, 58, 22))
         self.assertEqual(bottles_date_time[2], datetime.datetime(2017, 12, 29, 11, 44, 33))
 
+    def test_read_bottles_assert_two_avg(self):
+        self.assertRaises(AssertionError, get_bottle_firing_times.get_bottles_datetime, "ctd-bottle-firing-two-avg.btl")
+
+    def test_read_bottles_assert_no_avg_sdev(self):
+        self.assertRaises(AssertionError, get_bottle_firing_times.get_bottles_datetime, "lines-no-avg-sdev.btl")
+
     def test_write_to_file(self):
         bottles = {}
         bottles[1] = "2019-02-12 11:22:33"
