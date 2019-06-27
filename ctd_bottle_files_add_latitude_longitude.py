@@ -45,13 +45,14 @@ def add_latitude_longitude(input_file_path, output_file_path):
 
                     location = locator.datetime_datetime_to_position(bottles_date_times[bottle_number])
 
-                    if location is None:
-                        print("Position data do not exist for this date/time: ", input_file_path, "Date time: ", bottles_date_times[bottle_number])
-
-                    latitude_float, longitude_float = locator.datetime_datetime_to_position(bottles_date_times[bottle_number])
-
-                    latitude = "{:.5f}".format(latitude_float)
-                    longitude = "{:.5f}".format(longitude_float)
+                    if location is not None:
+                        latitude_float, longitude_float = locator.datetime_datetime_to_position(bottles_date_times[bottle_number])
+                        latitude = "{:.5f}".format(latitude_float)
+                        longitude = "{:.5f}".format(longitude_float)
+                    else:
+                        print("Position data do not exist for this date/time: ", bottles_date_times[bottle_number], "in the file: ", input_file_path)
+                        latitude = ""
+                        longitude = ""
 
                     new_line = insert_text(line, latitude, 2)
                     new_line = insert_text(new_line, longitude, 3)
