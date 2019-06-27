@@ -1,4 +1,4 @@
-import get_bottle_firing_positions
+import get_bottle_firing_times
 
 import unittest
 import datetime
@@ -6,14 +6,14 @@ import tempfile
 
 class TestGetBottleFiringPositions(unittest.TestCase):
     def test_read_bottles_date_time(self):
-        bottles_date_time = get_bottle_firing_positions.get_bottles_datetime("ctd-bottle-firing.btl")
+        bottles_date_time = get_bottle_firing_times.get_bottles_datetime("ctd-bottle-firing.btl")
 
         self.assertEqual(len(bottles_date_time), 2)
         self.assertEqual(bottles_date_time[1], datetime.datetime(2017, 12, 28, 12, 58, 22))
         self.assertEqual(bottles_date_time[2], datetime.datetime(2017, 12, 29, 11, 44, 33))
 
     def test_read_bottles_date_time_one_column_less(self):
-        bottles_date_time = get_bottle_firing_positions.get_bottles_datetime("ctd-bottle-firing-one-less-column.btl")
+        bottles_date_time = get_bottle_firing_times.get_bottles_datetime("ctd-bottle-firing-one-less-column.btl")
 
         self.assertEqual(len(bottles_date_time), 2)
         self.assertEqual(bottles_date_time[1], datetime.datetime(2017, 12, 28, 12, 58, 22))
@@ -26,7 +26,7 @@ class TestGetBottleFiringPositions(unittest.TestCase):
 
         output_filename = tempfile.NamedTemporaryFile()
 
-        get_bottle_firing_positions.write_to_file(output_filename.name, bottles)
+        get_bottle_firing_times.write_to_file(output_filename.name, bottles)
 
         file_contents = open(output_filename.name).readlines()
 
