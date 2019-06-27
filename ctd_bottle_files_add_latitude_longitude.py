@@ -43,6 +43,11 @@ def add_latitude_longitude(input_file_path, output_file_path):
                     information = get_bottle_firing_times.list_without_empty_values(information)
                     bottle_number = int(information[0])
 
+                    location = locator.datetime_datetime_to_position(bottles_date_times[bottle_number])
+
+                    if location is None:
+                        print("Position data do not exist for this date/time: ", input_file_path, "Date time: ", bottles_date_times[bottle_number])
+
                     latitude_float, longitude_float = locator.datetime_datetime_to_position(bottles_date_times[bottle_number])
 
                     latitude = "{:.5f}".format(latitude_float)
