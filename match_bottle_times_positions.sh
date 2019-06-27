@@ -13,7 +13,7 @@ do
 
     bottle_file_basename_no_suffix=$(basename $bottle_file .btl)
     bottles_with_date_time="$OUTPUT_BOTTLE_FILE_PATH/$bottle_file_basename_no_suffix.csv"
-    get_bottle_firing_times.py "$bottle_file" "$bottles_with_date_time"
+    ./get_bottle_firing_times.py "$bottle_file" "$bottles_with_date_time"
 
     output_matched_positions_filename="$bottle_file_basename_no_suffix-positions.csv"
 
