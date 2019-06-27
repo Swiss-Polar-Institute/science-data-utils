@@ -55,7 +55,7 @@ def get_all_positions(lat_lon_filepath, lat_lon_resolution):
 
 
 def get_list_dates(filepath):
-    date_column_list = [0]
+    date_column_list = [1]
 
     datatypes = {}
 
@@ -93,7 +93,7 @@ def process_get_positions(date_time_filepath, lat_lon_filepath, lat_lon_resoluti
     print(matched_position_df.head(10))
 
     # output the selected dataframe to a csv file
-    output_columns = ['date_time', 'latitude', 'longitude', 'measureland_qualifier_flag_overall']
+    output_columns = ['BTLNBR', 'date_time', 'latitude', 'longitude']
 
     aggregate_lower_resolution.output_dataframe_to_csv(matched_position_df, output_columns, output_filepath, output_filename)
 
