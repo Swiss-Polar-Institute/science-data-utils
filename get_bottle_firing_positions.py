@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import argparse
 import datetime
 import calendar
@@ -12,9 +11,11 @@ def list_without_empty_values(l):
 def get_bottles_datetime(ctd_file):
     data_line_number = 0
 
-    bottle_date_time = {}
+    bottles_date_time = {}
 
     month_to_number = {v: k for k, v in enumerate(calendar.month_abbr)}
+
+    current_bottle = None
 
     with open(ctd_file) as f:
         for line in f:
@@ -38,17 +39,15 @@ def get_bottles_datetime(ctd_file):
             line_fields = line.split(" ")
             line_fields = list_without_empty_values(line_fields)
 
-            len_line_fields = len(line_fields)
-            assert len_line_fields == 32 or len_line_fields == 31 or len_line_fields == 22 or len_line_fields == 23
-
-            if len_line_fields == 31 or len_line_fields == 32:
+            if "(avg)" in line:
+                assert current_bottle is None
                 current_bottle = {}
                 current_bottle['number'] = int(line_fields[0])
                 current_bottle['month'] = month_to_number[line_fields[1]]
                 current_bottle['day'] = int(line_fields[2])
                 current_bottle['year'] = int(line_fields[3])
 
-            if len_line_fields == 22 or len_line_fields == 23:
+            elif "(sdev)" in line:
                 current_bottle['time'] = line_fields[0]
 
                 # Converts the bottle information to date_time
@@ -57,9 +56,14 @@ def get_bottles_datetime(ctd_file):
                 d = datetime.datetime(current_bottle['year'], current_bottle['month'], current_bottle['day'],
                                   int(hour), int(minute), int(second))
 
-                bottle_date_time[current_bottle['number']] = d
+                bottles_date_time[current_bottle['number']] = d
 
-    return bottle_date_time
+                current_bottle = None
+
+            else:
+                assert False
+
+    return bottles_date_time
 
 
 def write_to_file(output_file, bottle_date_time):
@@ -73,6 +77,7 @@ def write_to_file(output_file, bottle_date_time):
             csvwriter.writerow([bottle_number, bottle_date_time[bottle_number]])
 
     print("Ouput file generated in:", output_file)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Read CTD file")
