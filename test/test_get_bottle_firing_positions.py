@@ -23,7 +23,7 @@ class TestGetBottleFiringPositions(unittest.TestCase):
         self.assertRaises(AssertionError, get_bottle_firing_times.get_bottles_datetime, "ctd-bottle-firing-two-avg.btl")
 
     def test_read_bottles_assert_no_avg_sdev(self):
-        self.assertRaises(AssertionError, get_bottle_firing_times.get_bottles_datetime, "lines-no-avg-sdev.btl")
+        self.assertRaises(AssertionError, get_bottle_firing_times.get_bottles_datetime, "ctd-bottle-firing-no-avg-sdev.btl")
 
     def test_write_to_file(self):
         bottles = {}
