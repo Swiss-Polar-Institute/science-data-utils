@@ -31,4 +31,6 @@ class TestGetBottleFiringPositions(unittest.TestCase):
         file_contents = open(output_filename.name).readlines()
 
         self.assertEqual(file_contents,
-                         ["1,2019-02-12 11:22:33\n", "2,2019-03-14 12:21:34\n"])
+                         ["BTLNBR,date_time\n",
+                          "1,2019-02-12 11:22:33\n",
+                          "2,2019-03-14 12:21:34\n"])

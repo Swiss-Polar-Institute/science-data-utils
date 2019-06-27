@@ -6,7 +6,6 @@ import numpy as np
 import os
 import pandas
 import time
-import csvkit
 
 def create_concatenated_csvfile(filepath, filename):
 
