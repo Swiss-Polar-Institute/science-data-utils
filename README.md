@@ -14,5 +14,11 @@ Latitude and longitude in NMEA strings were provided directly to the software op
 
 In order to simply extract the latitude and longitude from the cruise track data for the respective bottle files and save these into a separate .btl file for each cast, see the files `<match_bottle_times_positions.sh>`, which uses `<get_bottle_firing_times.py>` and `<get_positions.py>`. 
 
+## Credits
 
+This code has been authored by Carles Pina Estany and Jenny Thomas.
+
+## License
+
+This code is provided under the MIT license. Please see the LICENSE file for more information. 
 
