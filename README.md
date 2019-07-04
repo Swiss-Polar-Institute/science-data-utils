@@ -1,6 +1,6 @@
 # science-data-utils
 
-This repository contains a set of utilities that are used for data management, quality-checking of data, file processing and so on, by the Swiss Polar Institute.
+This repository contains a set of utilities that are used for management and quality-checking of scientific data files, as well as processing of such files, by the Swiss Polar Institute.
 
 Different utilities provide the ability to work with data from a variety of scientific disciplines, resulting from the [Antarctic Circumnavigation Expedition (ACE)](https://spi-ace-expedition.ch) which took place in the austral summer of 2016/2017. 
 
