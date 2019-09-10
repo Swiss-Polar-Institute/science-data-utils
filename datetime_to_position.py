@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import datetime
 
 
 class DatetimeToPosition(object):
@@ -29,3 +30,12 @@ class DatetimeToPosition(object):
             return None
 
         return float(result[0]), float(result[1])
+
+
+if __name__ == '__main__':
+    dt = datetime.datetime(2016, 12, 30, 13, 42, 6)
+
+    datetime_to_position = DatetimeToPosition()
+
+    position = datetime_to_position.datetime_datetime_to_position(dt)
+    print(position)
