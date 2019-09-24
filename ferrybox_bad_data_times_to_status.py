@@ -31,6 +31,7 @@ def combine_multiday_rows(list):
     previous_time_off_end = first_time_off_end
 
     count_midnight_rows_skipped = 0
+
     for row in list_iter:
         current_time_off_start = datetime.datetime.strptime(row[0] + ' ' + row[1], '%Y-%m-%d %H:%M:%S')
         current_time_off_end = datetime.datetime.strptime(row[0] + ' ' + row[2], '%Y-%m-%d %H:%M:%S')
