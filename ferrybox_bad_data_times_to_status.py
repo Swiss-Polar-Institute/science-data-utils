@@ -1,5 +1,6 @@
 import csv
 import datetime
+import copy
 
 
 def process_file(input_file):
@@ -60,6 +61,31 @@ def process_file(input_file):
             count_duplicate_lines_skipped += 1
             continue
 
+        while previous_line[1] + datetime.timedelta(seconds=1) == current_line[0]:
+            previous_line = [previous_line[0], datetime.datetime.strptime(line[0] + ' ' + line[2], '%Y-%m-%d %H:%M:%S')]
+            line = next(data_iter)
+
+            current_line = [datetime.datetime.strptime(line[0] + ' ' + line[1], '%Y-%m-%d %H:%M:%S'),
+                        datetime.datetime.strptime(line[0] + ' ' + line[2], '%Y-%m-%d %H:%M:%S')]
+
+            count_midnight_rows_skipped += 1
+
+        off_starts = previous_line[0]
+        off_ends = previous_line[1]
+
+        on_starts = previous_line[1]
+        on_ends = current_line[0]
+
+        all_data.append([off_starts, off_ends, 'off'])
+        all_data.append([on_starts, on_ends, 'on'])
+
+
+        # all_data.append([previous_line[0], previous_line[1], 'off'])
+        # all_data.append([previous_line[1], current_line[0], 'on'])
+
+        previous_line = current_line
+
+        continue
         # skip the rows which run over midnight
         # while previous_line[1] + datetime.timedelta(seconds=1) == current_line[0]:
         #     print('There is a row that goes over midnight')
