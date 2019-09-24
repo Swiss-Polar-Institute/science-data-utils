@@ -1,6 +1,5 @@
 import csv
 import datetime
-import copy
 
 
 def correct_seconds_same_minute(pump_log):
@@ -62,10 +61,10 @@ def collapse_same_day_off(l):
             previous = row
             row = next(list_iter)
 
-        if skipped == False:
+        if skipped:
+            output[-1][1] = previous[1]
             output.append([row[0], row[1]])
         else:
-            output[-1][1] = previous[1]
             output.append([row[0], row[1]])
 
         previous = row
