@@ -25,11 +25,10 @@ def process_file(input_file):
     current_line = [] # current line being read
     all_data = [] # output list of data
     count_duplicate_lines_skipped = 0 # lines that are skipped because they are duplicates in the original file
+    count_midnight_rows_skipped = 0 # lines that are skipped because they go over midnight
 
     # get the first row of data and create the first "step" out of it
     first_row = data[0]
-
-    one_second = datetime.timedelta(seconds=1)
 
     first_time_off = datetime.datetime.strptime(first_row[0] + " " + first_row[1], "%Y-%m-%d %H:%M:%S")
     first_time_on = datetime.datetime.strptime(first_row[0] + " " + first_row[2], "%Y-%m-%d %H:%M:%S") - datetime.timedelta(seconds=1) # subtract one second so that on and off time steps do not overlap
@@ -47,22 +46,42 @@ def process_file(input_file):
 
     # create an iterator to avoid having to read the first row of the list (this has already been used)
     data_iter = iter(data)
-
-    next(data_iter)
+    next(data_iter) # skips the first line
 
     for line in data_iter:
         # read the next row in the iterator and get the start and end times for the next step
-        next_time_off = datetime.datetime.strptime(line[0] + " " + line[1], "%Y-%m-%d %H:%M:%S")
-        next_time_on = datetime.datetime.strptime(line[0] + " " + line[2], "%Y-%m-%d %H:%M:%S")
-
-        print('LINE READ: ', next_time_off, ' ', next_time_on)
-        current_line = [next_time_off, next_time_on]
+        current_line = [datetime.datetime.strptime(line[0] + ' ' + line[1], '%Y-%m-%d %H:%M:%S'), datetime.datetime.strptime(line[0] + ' ' + line[2], '%Y-%m-%d %H:%M:%S')]
+        next_time_off = current_line[0]
+        next_time_on = current_line[1]
 
         # skip the line if it was the same as the previous line (this will remove the duplicates that existed)
         if current_line == previous_line:
             previous_line = current_line
             count_duplicate_lines_skipped += 1
             continue
+
+        # skip the rows which run over midnight
+        # while previous_line[1] + datetime.timedelta(seconds=1) == current_line[0]:
+        #     print('There is a row that goes over midnight')
+        #
+        #     print('PREVIOUS LINE: ', previous_line)
+        #     print('CURRENT LINE: ', current_line)
+        #     print("LINE", line)
+        #     next_line = next(data_iter)
+        #     print('NEXT LINE:, ', next_line)
+        #
+        #     previous_line = [previous_line[0], datetime.datetime.strptime(line[0] + ' ' + line[2], '%Y-%m-%d %H:%M:%S')]
+        #     #previous_line = [previous_line]
+        #     current_line = [datetime.datetime.strptime(next_line[0] + ' ' + next_line[1], '%Y-%m-%d %H:%M:%S'),
+        #                 datetime.datetime.strptime(next_line[0] + ' ' + next_line[2], '%Y-%m-%d %H:%M:%S')]
+        #     next_time_off = current_line[0]
+        #     next_time_on = current_line[1]
+        #
+        #     #previous_line = current_line
+        #     print('NEW PREVIOUS LINE: ', previous_line)
+        #     print('NEW CURRENT LINE: ', current_line)
+        #
+        #     count_midnight_rows_skipped += 1
 
         # Check that the times in the steps make sense
         if previous_time_on > next_time_off:
@@ -77,7 +96,7 @@ def process_file(input_file):
 
         if off_difference.total_seconds() == 0 and next_time_off.second == 0:
             # where the off times are the same to the nearest minute
-            print('Off times are the same to the nearest minute', off_difference)
+            #print('Off times are the same to the nearest minute', off_difference)
 
             next_time_on += datetime.timedelta(seconds=59)
             previous_time_off = next_time_off - datetime.timedelta(seconds=1)
@@ -87,7 +106,7 @@ def process_file(input_file):
             previous_time_on = next_time_on + datetime.timedelta(seconds=1)
         elif off_difference.total_seconds() == 0 and next_time_off.second != 0:
             # where the off times are the same to the nearest second
-            print('Off times are the same to the nearest second', off_difference)
+            #print('Off times are the same to the nearest second', off_difference)
 
             next_time_on += datetime.timedelta(seconds=1)
             previous_time_off = next_time_off - datetime.timedelta(seconds=1)
@@ -96,6 +115,17 @@ def process_file(input_file):
             # create the set-up for reading the next row, by assigning the end time from the line just read as the previous time for the next step
             previous_time_on = next_time_on + datetime.timedelta(seconds=1)
         else:
+            # THIS IS THE ALTERNATIVE WAY OF REMOVING THE ROWS THAT RUN OVER MIDNIGHT
+            # if previous_line[1] + datetime.timedelta(seconds=1) == current_line[0]: #and (previous_line[1].time() == datetime.datetime.strptime('23:59:59', '%H:%M:%S').time()):
+            #     # if there are rows that have off periods split over more than one day, then combine them into the same row
+            #     print('There is a row that goes over midnight')
+            #     print('Last row in all_data list: ', all_data[-1])
+            #     all_data[-1][1] = current_line[1]
+            #     print('Last row in all_data list changed to: ', all_data[-1])
+            #     count_midnight_rows_skipped += 1
+            #     previous_line = current_line
+            #     print()
+            #     continue
             # all other cases
             previous_time_off = next_time_off - datetime.timedelta(seconds=1)
             previous_step = [previous_time_on, previous_time_off, 'on']
@@ -105,19 +135,14 @@ def process_file(input_file):
             # create the set-up for reading the next row, by assigning the end time from the line just read as the previous time for the next step
             previous_time_on = next_step_time_on
 
-        # append these steps to the output list
-        print(previous_step)
-        print('TIME ON: ', next_time_off - previous_time_on)
-
         all_data.append(previous_step)
-
-        print(next_step)
-        print('TIME OFF: ', next_time_on - next_time_off)
 
         all_data.append(next_step)
         previous_line = current_line
+        print('---------------------------------------------------------------------------')
 
-        print("Number of lines skipped: ", count_duplicate_lines_skipped)
+    print('Number of duplicate lines skipped: ', count_duplicate_lines_skipped)
+    print('Number of midnight lines skipped: ', count_midnight_rows_skipped)
 
     return all_data
 
@@ -134,12 +159,12 @@ def list_to_csv(list, output_file):
 def main():
 
     input_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump.csv'
-    output_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump_status_nearest_second_others_subtract_second_off_time_subtract_second.csv'
+    output_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump_status_nearest_second_others_subtract_second_off_time_subtract_second_midnight_rows_removed.csv'
 
     status_data = process_file(input_file)
     print(status_data)
     print('total length: ', len(status_data))
-    #list_to_csv(status_data, output_file)
+    list_to_csv(status_data, output_file)
 
 
 if __name__ == "__main__":
