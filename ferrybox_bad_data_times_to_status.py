@@ -21,12 +21,16 @@ def process_file(input_file):
     # get the first row of data and create the first "step" out of it
     first_row = data[0]
 
+    one_second = datetime.timedelta(seconds=1)
+
     first_time_off = datetime.datetime.strptime(first_row[0] + " " + first_row[1], "%Y-%m-%d %H:%M:%S")
     first_time_on = datetime.datetime.strptime(first_row[0] + " " + first_row[2], "%Y-%m-%d %H:%M:%S")
 
     # each step will be defined in a list: start time, end time, status
     previous_step = []
     next_step = []
+    previous_line = []
+    current_line = []
 
     # this first row has already been designated as off
     first_step = [first_time_off, first_time_on, 'off']
@@ -44,43 +48,106 @@ def process_file(input_file):
 
     # add the first row to the list
     all_data.append(first_step)
+    previous_line = [first_time_off, first_time_on]
+
+    count_lines_skipped = 0
 
     for line in data_iter:
         # read the next row in the iterator and get the start and end times for the next step
         next_time_off = datetime.datetime.strptime(line[0] + " " + line[1], "%Y-%m-%d %H:%M:%S")
         next_time_on = datetime.datetime.strptime(line[0] + " " + line[2], "%Y-%m-%d %H:%M:%S")
 
-        # assign these times to the next on and off steps
-        previous_step = [previous_time_on, next_time_off, 'on']
-        next_step = [next_time_off, next_time_on, 'off']
+        print('LINE READ: ', next_time_off, ' ', next_time_on)
+        current_line = [next_time_off, next_time_on]
+
+        # skip the line if it was the same as the previous line (this will remove the duplicates that existed)
+        if current_line == previous_line:
+            previous_line = current_line
+            count_lines_skipped += 1
+            continue
 
         # Check that the times in the steps make sense
         if previous_time_on > next_time_off:
-            raise ValueError('Start time of on row cannot be after end time:', previous_step)
+            raise ValueError('Start time of on row cannot be after the end time:')
 
         if next_time_off > next_time_on:
             raise ValueError('Start time of off row cannot be after end time:', next_step)
 
+        # check difference between start and end times for each step:
+        on_difference = next_time_off - previous_time_on
+        off_difference = next_time_on - next_time_off
+
+        # # where they are the same to the nearest minute
+        # if on_difference.total_seconds() == 0 and previous_time_on.second == 0:
+        #     print("On times are the same to the nearest minute", on_difference)
+
+        # where the off times are the same to the nearest minute
+        if off_difference.total_seconds() == 0 and next_time_off.second == 0:
+            print('Off times are the same to the nearest minute', off_difference)
+            # print(next_step)
+            # print('TIME OFF: ', next_time_on - next_time_off)
+            next_time_on += datetime.timedelta(seconds=59)
+            previous_time_off = next_time_off - datetime.timedelta(seconds=1)
+            #print(next_time_on)
+            #new_off_difference = next_time_on - next_time_off
+            #print('Off difference: ', new_off_difference.total_seconds())
+            previous_step = [previous_time_on, previous_time_off, 'on']
+            next_step = [next_time_off, next_time_on, 'off']
+            # create the set-up for reading the next row, by assigning the end time from the line just read as the previous time for the next step
+            previous_time_on = next_time_on + datetime.timedelta(seconds=1)
+        elif off_difference.total_seconds() == 0 and next_time_off.second != 0:
+            print('Off times are the same to the nearest second', off_difference)
+            next_time_on += datetime.timedelta(seconds=1)
+            previous_time_off = next_time_off - datetime.timedelta(seconds=1)
+            previous_step = [previous_time_on, previous_time_off, 'on']
+            next_step = [next_time_off, next_time_on, 'off']
+            previous_time_on = next_time_on + datetime.timedelta(seconds=1)
+        else:
+            # assign these times to the next on and off steps
+            previous_time_off = next_time_off - datetime.timedelta(seconds=1)
+            previous_step = [previous_time_on, previous_time_off, 'on']
+            #previous_step = [previous_time_on, next_time_off, 'on']
+            next_step_time_on = next_time_on
+            next_time_on = next_time_on - datetime.timedelta(seconds=1)
+            next_step = [next_time_off, next_time_on, 'off']
+            # create the set-up for reading the next row, by assigning the end time from the line just read as the previous time for the next step
+            previous_time_on = next_step_time_on
+
         # append these steps to the output list
         print(previous_step)
+        print('TIME ON: ', next_time_off - previous_time_on)
+
         all_data.append(previous_step)
 
         print(next_step)
+        print('TIME OFF: ', next_time_on - next_time_off)
+
         all_data.append(next_step)
+        previous_line = current_line
 
-        # create the set-up for reading the next row, by assigning the end time from the line just read as the previous time for the next step
-        previous_time_on = next_time_on
 
+        print("Number of lines skipped: ", count_lines_skipped)
     return all_data
 
+def list_to_csv(list, output_file):
+    """Output the list of data to a csv file"""
+    with open(output_file, 'w', ) as csvFile:
+        writer = csv.writer(csvFile)
+        writer.writerow(['start_datetime', 'end_datetime', 'status'])
+        writer.writerows(list)
+
+    csvFile.close()
 
 
 def main():
 
     input_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump.csv'
+    output_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump_status_nearest_second_others_subtract_second_off_time_subtract_second.csv'
 
     status_data = process_file(input_file)
     print(status_data)
+    print('total length: ', len(status_data))
+    list_to_csv(status_data, output_file)
 
 
 if __name__ == "__main__":
