@@ -32,7 +32,7 @@ def process_file(input_file):
 
     first_time_off = datetime.datetime.strptime(first_row[0] + " " + first_row[1], "%Y-%m-%d %H:%M:%S")
     first_time_on = datetime.datetime.strptime(first_row[0] + " " + first_row[2], "%Y-%m-%d %H:%M:%S") - datetime.timedelta(seconds=1) # subtract one second so that on and off time steps do not overlap
-
+    print(first_time_on)
     # this first row has already been designated as off
     first_step = [first_time_off, first_time_on, 'off']
 
