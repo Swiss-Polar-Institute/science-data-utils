@@ -18,39 +18,37 @@ def process_file(input_file):
     # sort the list of data so that the missing times can be added one line at a time
     data.sort()
 
+    # each step will be defined in a list: start time, end time, status
+    previous_step = []
+    next_step = []
+    previous_line = [] # previous line that was read
+    current_line = [] # current line being read
+    all_data = [] # output list of data
+    count_duplicate_lines_skipped = 0 # lines that are skipped because they are duplicates in the original file
+
     # get the first row of data and create the first "step" out of it
     first_row = data[0]
 
     one_second = datetime.timedelta(seconds=1)
 
     first_time_off = datetime.datetime.strptime(first_row[0] + " " + first_row[1], "%Y-%m-%d %H:%M:%S")
-    first_time_on = datetime.datetime.strptime(first_row[0] + " " + first_row[2], "%Y-%m-%d %H:%M:%S")
-
-    # each step will be defined in a list: start time, end time, status
-    previous_step = []
-    next_step = []
-    previous_line = []
-    current_line = []
+    first_time_on = datetime.datetime.strptime(first_row[0] + " " + first_row[2], "%Y-%m-%d %H:%M:%S") - datetime.timedelta(seconds=1) # subtract one second so that on and off time steps do not overlap
 
     # this first row has already been designated as off
     first_step = [first_time_off, first_time_on, 'off']
 
     # set the time the pump was on for the next row, as the time from the first row
-    previous_time_on = first_time_on
-
-    # create an iterator to avoid having to read the first row of the list (this has already been used)
-    data_iter = iter(data)
-
-    next(data_iter)
-
-    # create an output list for all steps to be added to
-    all_data = []
+    next_time_on = first_time_on + datetime.timedelta(seconds=1) # add the second to get a time that does not overlap with the off row
+    previous_time_on = next_time_on
 
     # add the first row to the list
     all_data.append(first_step)
     previous_line = [first_time_off, first_time_on]
 
-    count_lines_skipped = 0
+    # create an iterator to avoid having to read the first row of the list (this has already been used)
+    data_iter = iter(data)
+
+    next(data_iter)
 
     for line in data_iter:
         # read the next row in the iterator and get the start and end times for the next step
@@ -63,7 +61,7 @@ def process_file(input_file):
         # skip the line if it was the same as the previous line (this will remove the duplicates that existed)
         if current_line == previous_line:
             previous_line = current_line
-            count_lines_skipped += 1
+            count_duplicate_lines_skipped += 1
             continue
 
         # Check that the times in the steps make sense
@@ -77,36 +75,30 @@ def process_file(input_file):
         on_difference = next_time_off - previous_time_on
         off_difference = next_time_on - next_time_off
 
-        # # where they are the same to the nearest minute
-        # if on_difference.total_seconds() == 0 and previous_time_on.second == 0:
-        #     print("On times are the same to the nearest minute", on_difference)
-
-        # where the off times are the same to the nearest minute
         if off_difference.total_seconds() == 0 and next_time_off.second == 0:
+            # where the off times are the same to the nearest minute
             print('Off times are the same to the nearest minute', off_difference)
-            # print(next_step)
-            # print('TIME OFF: ', next_time_on - next_time_off)
+
             next_time_on += datetime.timedelta(seconds=59)
             previous_time_off = next_time_off - datetime.timedelta(seconds=1)
-            #print(next_time_on)
-            #new_off_difference = next_time_on - next_time_off
-            #print('Off difference: ', new_off_difference.total_seconds())
             previous_step = [previous_time_on, previous_time_off, 'on']
             next_step = [next_time_off, next_time_on, 'off']
             # create the set-up for reading the next row, by assigning the end time from the line just read as the previous time for the next step
             previous_time_on = next_time_on + datetime.timedelta(seconds=1)
         elif off_difference.total_seconds() == 0 and next_time_off.second != 0:
+            # where the off times are the same to the nearest second
             print('Off times are the same to the nearest second', off_difference)
+
             next_time_on += datetime.timedelta(seconds=1)
             previous_time_off = next_time_off - datetime.timedelta(seconds=1)
             previous_step = [previous_time_on, previous_time_off, 'on']
             next_step = [next_time_off, next_time_on, 'off']
+            # create the set-up for reading the next row, by assigning the end time from the line just read as the previous time for the next step
             previous_time_on = next_time_on + datetime.timedelta(seconds=1)
         else:
-            # assign these times to the next on and off steps
+            # all other cases
             previous_time_off = next_time_off - datetime.timedelta(seconds=1)
             previous_step = [previous_time_on, previous_time_off, 'on']
-            #previous_step = [previous_time_on, next_time_off, 'on']
             next_step_time_on = next_time_on
             next_time_on = next_time_on - datetime.timedelta(seconds=1)
             next_step = [next_time_off, next_time_on, 'off']
@@ -125,8 +117,8 @@ def process_file(input_file):
         all_data.append(next_step)
         previous_line = current_line
 
+        print("Number of lines skipped: ", count_duplicate_lines_skipped)
 
-        print("Number of lines skipped: ", count_lines_skipped)
     return all_data
 
 def list_to_csv(list, output_file):
@@ -147,7 +139,7 @@ def main():
     status_data = process_file(input_file)
     print(status_data)
     print('total length: ', len(status_data))
-    list_to_csv(status_data, output_file)
+    #list_to_csv(status_data, output_file)
 
 
 if __name__ == "__main__":
