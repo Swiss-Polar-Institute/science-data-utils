@@ -3,6 +3,38 @@ import datetime
 import copy
 
 
+def correct_seconds_same_minute(pump_log):
+    output = []
+
+    pending_add_second = 0
+    for row in pump_log:
+        if row[0].second == 0 and row[0] == row[1]:
+            row[1] = row[1] + datetime.timedelta(seconds=59)
+            output.append([row[0], row[1]])
+            # output.append([row[0] + datetime.timedelta(seconds=pending_add_second), row[1]])
+            pending_add_second = 1
+        else:
+            output.append([row[0], row[1]])
+            # output.append([row[0] + datetime.timedelta(seconds=pending_add_second), row[1]])
+            pending_add_second = 0
+
+    return output
+
+
+def process_file2(input_file):
+    pump_log = read_file_to_list(input_file)
+
+    pump_log = change_format_from_input_to_datetime(pump_log)
+
+    pump_log = collapse_same_day_off(pump_log)
+
+    pump_log = correct_seconds_same_minute(pump_log)
+
+    result = process_to_on_off(pump_log)
+
+    return result
+
+
 def read_file_to_list(input_file):
     with open(input_file) as csvfile:
         csv_rows = csv.reader(csvfile)
@@ -14,46 +46,68 @@ def read_file_to_list(input_file):
     return data
 
 
-def combine_multiday_rows(list):
+def collapse_same_day_off(l):
+    output = []
+
+    list_iter = iter(l)
+
+    previous = next(list_iter)
+
+    output.append(previous)
+
+    for row in list_iter:
+        skipped = False
+        while previous[1] + datetime.timedelta(seconds=1) == row[0]:
+            skipped = True
+            previous = row
+            row = next(list_iter)
+
+        if skipped == False:
+            output.append([row[0], row[1]])
+        else:
+            output[-1][1] = previous[1]
+            output.append([row[0], row[1]])
+
+        previous = row
+
+    return output
+
+
+def change_format_from_input_to_datetime(list):
+    data_output = []
+
+    for row in list:
+        data_output.append([datetime.datetime.strptime(row[0] + " " + row[1], "%Y-%m-%d %H:%M:%S"),
+                            datetime.datetime.strptime(row[0] + " " + row[2], "%Y-%m-%d %H:%M:%S")])
+
+    return data_output
+
+
+def process_to_on_off(l):
     output_list = []
 
-    list_iter = iter(list)
+    list_iter = iter(l)
 
     first_row = next(list_iter)
 
-    first_time_off_start = datetime.datetime.strptime(first_row[0] + " " + first_row[1], "%Y-%m-%d %H:%M:%S")
-    first_time_off_end = datetime.datetime.strptime(first_row[0] + " " + first_row[2], "%Y-%m-%d %H:%M:%S")
-
-    first_step = [first_time_off_start, first_time_off_end, 'off']
-
-    output_list.append(first_step)
-
-    previous_time_off_end = first_time_off_end
+    previous_time_off_start = first_row[0]
+    previous_time_off_end = first_row[1]
 
     count_midnight_rows_skipped = 0
 
+    output_list.append([previous_time_off_start, previous_time_off_end, 'off'])
+
     for row in list_iter:
-        current_time_off_start = datetime.datetime.strptime(row[0] + ' ' + row[1], '%Y-%m-%d %H:%M:%S')
-        current_time_off_end = datetime.datetime.strptime(row[0] + ' ' + row[2], '%Y-%m-%d %H:%M:%S')
-
-        while previous_time_off_end + datetime.timedelta(seconds=1) == current_time_off_start:
-            previous_time_off_start = current_time_off_start
-            previous_time_off_end = current_time_off_end
-
-            row = next(list_iter)
-
-            current_time_off_start = datetime.datetime.strptime(row[0] + ' ' + row[1], '%Y-%m-%d %H:%M:%S')
-            current_time_off_end = datetime.datetime.strptime(row[0] + ' ' + row[2], '%Y-%m-%d %H:%M:%S')
-
-            count_midnight_rows_skipped += 1
+        current_time_off_start = row[0]
+        current_time_off_end = row[1]
 
         output_list.append([previous_time_off_end, current_time_off_start, 'on'])
         output_list.append([current_time_off_start, current_time_off_end, 'off'])
 
-        previous_time_off_start = current_time_off_start
         previous_time_off_end = current_time_off_end
 
     return output_list
+
 
 def process_file(input_file):
     """Get the input csv file and convert the times from off and on, to start and end of on/off status.
@@ -64,7 +118,7 @@ def process_file(input_file):
     data = read_file_to_list(input_file)
     data.sort()
 
-    list_1 = combine_multiday_rows(data)
+    list_1 = process_to_on_off(data)
 
     all_data = [] # output list of data
     count_duplicate_lines_skipped = 0 # lines that are skipped because they are duplicates in the original file
@@ -190,6 +244,7 @@ def process_file(input_file):
 
     return all_data
 
+
 def list_to_csv(list, output_file):
     """Output the list of data to a csv file"""
     with open(output_file, 'w', ) as csvFile:
@@ -199,12 +254,11 @@ def list_to_csv(list, output_file):
 
     csvFile.close()
 
-
 def main():
-    input_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump.csv'
-    output_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump_status_nearest_second_others_subtract_second_off_time_subtract_second_midnight_rows_removed.csv'
+    input_file = '/home/carles/pump.csv'
+    output_file = '/home/carles/pump_output.csv'
 
-    status_data = process_file(input_file)
+    status_data = process_file2(input_file)
     print(status_data)
     print('total length: ', len(status_data))
     list_to_csv(status_data, output_file)
