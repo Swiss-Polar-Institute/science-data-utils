@@ -2,12 +2,39 @@ import csv
 import datetime
 
 
-def process_file(input_file):
-    """Get the input csv file and convert the times from off and on, to start and end of on/off status.
+def correct_seconds_same_minute(pump_log):
+    output = []
 
-    :param input_file: file path and name of csv file
-    """
+    pending_add_second = 0
+    for row in pump_log:
+        if row[0].second == 0 and row[0] == row[1]:
+            row[1] = row[1] + datetime.timedelta(seconds=59)
+            output.append([row[0], row[1]])
+            # output.append([row[0] + datetime.timedelta(seconds=pending_add_second), row[1]])
+            pending_add_second = 1
+        else:
+            output.append([row[0], row[1]])
+            # output.append([row[0] + datetime.timedelta(seconds=pending_add_second), row[1]])
+            pending_add_second = 0
 
+    return output
+
+
+def process_file2(input_file):
+    pump_log = read_file_to_list(input_file)
+
+    pump_log = change_format_from_input_to_datetime(pump_log)
+
+    pump_log = collapse_same_day_off(pump_log)
+
+    pump_log = correct_seconds_same_minute(pump_log)
+
+    result = process_to_on_off(pump_log)
+
+    return result
+
+
+def read_file_to_list(input_file):
     with open(input_file) as csvfile:
         csv_rows = csv.reader(csvfile)
 
@@ -15,14 +42,83 @@ def process_file(input_file):
         for row in csv_rows:
             data.append(row)
 
-    # sort the list of data so that the missing times can be added one line at a time
+    return data
+
+
+def collapse_same_day_off(l):
+    output = []
+
+    list_iter = iter(l)
+
+    previous = next(list_iter)
+
+    output.append(previous)
+
+    for row in list_iter:
+        skipped = False
+        while previous[1] + datetime.timedelta(seconds=1) == row[0]:
+            skipped = True
+            previous = row
+            row = next(list_iter)
+
+        if skipped:
+            output[-1][1] = previous[1]
+            output.append([row[0], row[1]])
+        else:
+            output.append([row[0], row[1]])
+
+        previous = row
+
+    return output
+
+
+def change_format_from_input_to_datetime(list):
+    data_output = []
+
+    for row in list:
+        data_output.append([datetime.datetime.strptime(row[0] + " " + row[1], "%Y-%m-%d %H:%M:%S"),
+                            datetime.datetime.strptime(row[0] + " " + row[2], "%Y-%m-%d %H:%M:%S")])
+
+    return data_output
+
+
+def process_to_on_off(l):
+    output_list = []
+
+    list_iter = iter(l)
+
+    first_row = next(list_iter)
+
+    previous_time_off_start = first_row[0]
+    previous_time_off_end = first_row[1]
+
+    count_midnight_rows_skipped = 0
+
+    output_list.append([previous_time_off_start, previous_time_off_end, 'off'])
+
+    for row in list_iter:
+        current_time_off_start = row[0]
+        current_time_off_end = row[1]
+
+        output_list.append([previous_time_off_end, current_time_off_start, 'on'])
+        output_list.append([current_time_off_start, current_time_off_end, 'off'])
+
+        previous_time_off_end = current_time_off_end
+
+    return output_list
+
+
+def process_file(input_file):
+    """Get the input csv file and convert the times from off and on, to start and end of on/off status.
+
+    :param input_file: file path and name of csv file
+    """
+
+    data = read_file_to_list(input_file)
     data.sort()
 
-    # each step will be defined in a list: start time, end time, status
-    previous_step = []
-    next_step = []
-    previous_line = [] # previous line that was read
-    current_line = [] # current line being read
+    list_1 = process_to_on_off(data)
+
     all_data = [] # output list of data
     count_duplicate_lines_skipped = 0 # lines that are skipped because they are duplicates in the original file
     count_midnight_rows_skipped = 0 # lines that are skipped because they go over midnight
@@ -60,28 +156,29 @@ def process_file(input_file):
             count_duplicate_lines_skipped += 1
             continue
 
-        # skip the rows which run over midnight
-        # while previous_line[1] + datetime.timedelta(seconds=1) == current_line[0]:
-        #     print('There is a row that goes over midnight')
-        #
-        #     print('PREVIOUS LINE: ', previous_line)
-        #     print('CURRENT LINE: ', current_line)
-        #     print("LINE", line)
-        #     next_line = next(data_iter)
-        #     print('NEXT LINE:, ', next_line)
-        #
-        #     previous_line = [previous_line[0], datetime.datetime.strptime(line[0] + ' ' + line[2], '%Y-%m-%d %H:%M:%S')]
-        #     #previous_line = [previous_line]
-        #     current_line = [datetime.datetime.strptime(next_line[0] + ' ' + next_line[1], '%Y-%m-%d %H:%M:%S'),
-        #                 datetime.datetime.strptime(next_line[0] + ' ' + next_line[2], '%Y-%m-%d %H:%M:%S')]
-        #     next_time_off = current_line[0]
-        #     next_time_on = current_line[1]
-        #
-        #     #previous_line = current_line
-        #     print('NEW PREVIOUS LINE: ', previous_line)
-        #     print('NEW CURRENT LINE: ', current_line)
-        #
-        #     count_midnight_rows_skipped += 1
+        while previous_line[1] + datetime.timedelta(seconds=1) == current_line[0]:
+            previous_line = [previous_line[0], datetime.datetime.strptime(line[0] + ' ' + line[2], '%Y-%m-%d %H:%M:%S')]
+            line = next(data_iter)
+
+            current_line = [datetime.datetime.strptime(line[0] + ' ' + line[1], '%Y-%m-%d %H:%M:%S'),
+                        datetime.datetime.strptime(line[0] + ' ' + line[2], '%Y-%m-%d %H:%M:%S')]
+
+            count_midnight_rows_skipped += 1
+
+        off_starts = previous_line[0]
+        off_ends = previous_line[1]
+
+        on_starts = previous_line[1]
+        on_ends = current_line[0]
+
+        all_data.append([off_starts, off_ends, 'off'])
+        all_data.append([on_starts, on_ends, 'on'])
+
+
+        # all_data.append([previous_line[0], previous_line[1], 'off'])
+        # all_data.append([previous_line[1], current_line[0], 'on'])
+
+        previous_line = current_line
 
         # Check that the times in the steps make sense
         if previous_time_on > next_time_off:
@@ -146,6 +243,7 @@ def process_file(input_file):
 
     return all_data
 
+
 def list_to_csv(list, output_file):
     """Output the list of data to a csv file"""
     with open(output_file, 'w', ) as csvFile:
@@ -155,13 +253,11 @@ def list_to_csv(list, output_file):
 
     csvFile.close()
 
-
 def main():
+    input_file = '/home/carles/pump.csv'
+    output_file = '/home/carles/pump_output.csv'
 
-    input_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump.csv'
-    output_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump_status_nearest_second_others_subtract_second_off_time_subtract_second_midnight_rows_removed.csv'
-
-    status_data = process_file(input_file)
+    status_data = process_file2(input_file)
     print(status_data)
     print('total length: ', len(status_data))
     list_to_csv(status_data, output_file)
