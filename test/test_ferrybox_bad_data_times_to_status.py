@@ -57,21 +57,23 @@ class TestFerryboxBadDataTimesToStatus(unittest.TestCase):
     #
     #     self.assertListEqual(actual, expected)
 
-    # def test_combine_multiday_rows(self):
-    #     pump_log = [['2016-12-25', '23:45:00', '23:50:00'],
-    #                 ['2016-12-26', '06:10:00', '20:40:00'],
-    #                 ['2016-12-27', '19:00:00', '20:00:00'],
-    #                 ]
-    #     expected = [[text_to_dt('2016-12-25 23:45:00'), text_to_dt('2016-12-25 23:50:00'), 'off'],
-    #                 [text_to_dt('2016-12-25 23:50:00'), text_to_dt('2016-12-26 06:10:00'), 'on'],
-    #                 [text_to_dt('2016-12-26 06:10:00'), text_to_dt('2016-12-26 20:40:00'), 'off'],
-    #                 [text_to_dt('2016-12-26 20:40:00'), text_to_dt('2016-12-27 19:00:00'), 'on'],
-    #                 [text_to_dt('2016-12-27 19:00:00'), text_to_dt('2016-12-27 20:00:00'), 'off'],
-    #                 ]
-    #
-    #     actual = ferrybox_bad_data_times_to_status.process_to_on_off(pump_log)
-    #
-    #     self.assertListEqual(actual, expected)
+    def test_combine_multiday_rows(self):
+        pump_log = [['2016-12-25', '23:45:00', '23:50:00'],
+                    ['2016-12-26', '06:10:00', '20:40:00'],
+                    ['2016-12-27', '19:00:00', '20:00:00'],
+                    ]
+        expected = [[text_to_dt('2016-12-25 23:45:00'), text_to_dt('2016-12-25 23:50:00'), 'off'],
+                    [text_to_dt('2016-12-25 23:50:00'), text_to_dt('2016-12-26 06:10:00'), 'on'],
+                    [text_to_dt('2016-12-26 06:10:00'), text_to_dt('2016-12-26 20:40:00'), 'off'],
+                    [text_to_dt('2016-12-26 20:40:00'), text_to_dt('2016-12-27 19:00:00'), 'on'],
+                    [text_to_dt('2016-12-27 19:00:00'), text_to_dt('2016-12-27 20:00:00'), 'off'],
+                    ]
+
+        pump_log = ferrybox_bad_data_times_to_status.change_format_from_input_to_datetime(pump_log)
+
+        actual = ferrybox_bad_data_times_to_status.process_to_on_off(pump_log)
+
+        self.assertListEqual(actual, expected)
 
     def test_combine_multiday_rows_join(self):
         pump_log = [['2016-12-24', '11:30:00', '12:30:00'],
