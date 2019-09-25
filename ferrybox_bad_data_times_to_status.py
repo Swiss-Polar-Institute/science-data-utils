@@ -57,7 +57,7 @@ def collapse_same_day_off(list_dt_dt):
 
     collapsed_list.append(previous)
 
-    count_midnight_rows_skipped = 0
+    count_rows_skipped = 0
 
     for row in list_iter:
         skipped = False
@@ -67,7 +67,7 @@ def collapse_same_day_off(list_dt_dt):
             skipped = True
             previous = row
             row = next(list_iter)
-            count_midnight_rows_skipped += 1
+            count_rows_skipped += 1
 
         if skipped:
             collapsed_list[-1][1] = previous[1] # change the end time of the previous row to be the end time of the
@@ -77,6 +77,8 @@ def collapse_same_day_off(list_dt_dt):
             collapsed_list.append([row[0], row[1]])
 
         previous = row
+
+    print('Rows combined:', count_rows_skipped)
 
     return collapsed_list
 
