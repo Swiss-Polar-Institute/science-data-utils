@@ -176,8 +176,8 @@ def process_file(input_file):
 
 
 def main():
-    input_file = '/home/carles/pump.csv'
-    output_file = '/home/carles/pump_output.csv'
+    input_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump.csv'
+    output_file = '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/ferrybox/pump_output.csv'
 
     on_off_periods = process_file(input_file)
 
