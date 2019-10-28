@@ -241,14 +241,11 @@ def knots_two_points(origin, destination):
 
     datetime1_timestamp, lat1, lon1 = origin
     datetime2_timestamp, lat2, lon2 = destination
-    # datetime1 = datetime.datetime.strptime(datetime_str1,"%Y-%m-%d %H:%M:%S.%f")
-    # datetime2 = datetime.datetime.strptime(datetime_str2,"%Y-%m-%d %H:%M:%S.%f")
 
     datetime1 = datetime1_timestamp.timestamp()
     datetime2 = datetime2_timestamp.timestamp()
 
     seconds = abs((datetime1) - (datetime2))
-    # seconds = abs((datetime_str1)-(datetime_str2)).total_seconds()
     conversion = 3600 / 1852  # convert 1 ms-1 to knots (nautical miles per hour; 1 nm = 1852 metres)
     speed_knots = (distance_m / seconds) * conversion
 
@@ -269,10 +266,8 @@ def calculate_speed(position_df):
     """Calculate the speed between consectutive points and add this as a variable to the dataframe."""
 
     print("Calculating speed of track")
-    #total_data_points = len(position_df)
 
     earliest_date_time = position_df['date_time'].min()
-    #latest_date_time = position_df['date_time'].max()
 
     current_date = earliest_date_time
 
@@ -334,8 +329,9 @@ def analyse_speed(position_df):
 
 
 def analyse_distance_between_points(position_df):
-    """Analyse the distance between the points. Even when the ship is stationary, the lat and long vary slightly. Where there is an error in the lat and long being the same in consecutive points, the
-    distance should be greater than 0 (to 6 dp, which is equivalent to 0.19 cm at the Equator)."""
+    """Analyse the distance between the points. Even when the ship is stationary, the lat and long vary slightly.
+    Where there is an error in the lat and long being the same in consecutive points, the distance should be greater
+    than 0 (to 6 dp, which is equivalent to 0.19 cm at the Equator)."""
 
     print("Analysing distance between consecutive points.")
 
@@ -407,12 +403,9 @@ def analyse_course(position_df):
     previous_position = get_location(earliest_date_time, position_df)
     datetime_previous, latitude_previous, longitude_previous = previous_position
 
-    #previous_bearing = 0
     previous_speed_knots = 0
 
-    #count_bearing_errors = 0
     count_acceleration_errors = 0
-    #count_ship_stationary_bearing_error = 0 # ship at speed <= 0.3 and bearing tight.
 
     line_number = -1
     for position in position_df.itertuples():
@@ -425,10 +418,6 @@ def analyse_course(position_df):
             continue
 
         current_position = position[2:5]
-
-        # Calculate bearing and change in bearing
-        #current_bearing = calculate_bearing(previous_position, current_position)
-        #difference_in_bearing = calculate_bearing_difference(current_bearing, previous_bearing)
 
         # Calculate acceleration between two points
         current_conditions = knots_two_points(previous_position, current_position)
@@ -443,35 +432,7 @@ def analyse_course(position_df):
             acceleration = 0
 
         # Print errors where data do not meet requirements
-        error_message_bearing = ""
         error_message_acceleration = ""
-
-        # if abs(difference_in_bearing) == "N/A":
-        #     error_message_bearing = "No bearing?"
-        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 9 # missing values
-        # elif abs(difference_in_bearing) >= 10 and current_speed_knots > 0.3:
-        #     error_message_bearing = "** Turn too tight **"
-        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 3 # probably bad value
-        #     count_bearing_errors += 1
-        # elif abs(difference_in_bearing) >= 10 and current_speed_knots <= 0.3:
-        #     error_message_bearing = "** Turn tight but ship stationary **"
-        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 2 # probably good value
-        #     count_ship_stationary_bearing_error += 1
-        # elif abs(difference_in_bearing) < 10:
-        #     position_df.at[row_index, 'measureland_qualifier_flag_course'] = 1 # good value
-
-        # if error_message_bearing != "":
-        #     print("Previous: ", previous_position)
-        #     print("Current: ", current_position)
-        #     print("Current speed: ", current_speed_knots)
-        #     print("Error:  {} Start {}  ({:.4f}, {:.4f})   End {} to position ({:.4f}, {:.4f}) bearing change: {} degrees".format(error_message_bearing,
-        #                                                                              previous_position[0],
-        #                                                                              previous_position[1],
-        #                                                                              previous_position[2],
-        #                                                                              current_position[0],
-        #                                                                              current_position[1],
-        #                                                                              current_position[2],
-        #                                                                              difference_in_bearing))
 
         if acceleration == "N/A":
             error_message_acceleration = "No acceleration value calculated"
@@ -495,8 +456,6 @@ def analyse_course(position_df):
 
     #position_df['measureland_qualifier_flag_course'] = position_df['measureland_qualifier_flag_course'].astype(int)
     position_df['measureland_qualifier_flag_acceleration'] = position_df['measureland_qualifier_flag_acceleration'].astype(int)
-
-    #return (count_bearing_errors, count_acceleration_errors, count_ship_stationary_bearing_error)
 
     return (count_acceleration_errors)
 
@@ -549,8 +508,8 @@ def update_visual_position_flag(dataframe, invalid_position_filepath):
 def calculate_measureland_qualifier_flag_overall(row):
     """Calculate the overall data quality flag taking into account the others that have been assigned."""
 
-    mqf_tuple = (row['measureland_qualifier_flag_speed'], row['measureland_qualifier_flag_distance'],
-                 #row['measureland_qualifier_flag_course'],
+    mqf_tuple = (row['measureland_qualifier_flag_speed'],
+                 row['measureland_qualifier_flag_distance'],
                  row['measureland_qualifier_flag_acceleration'],
                  row['measureland_qualifier_flag_visual'])
 
@@ -597,7 +556,6 @@ def remove_intermediate_columns(dataframe):
     """Remove the intermediate step qualifier flag columns that are not required in the final output data set."""
 
     combined_dataframe_dropped_cols = dataframe.drop(columns = ['measureland_qualifier_flag_speed',
-                                                                #'measureland_qualifier_flag_course',
                                                                 'measureland_qualifier_flag_distance',
                                                                 'measureland_qualifier_flag_acceleration',
                                                                 'measureland_qualifier_flag_visual'])
@@ -614,7 +572,10 @@ def choose_rows(rows):
     # Ensure that the object is not empty.
     assert(len(rows) > 0)
 
-    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble). Also select by data quality (1 = good value, 2 = probably good value). If the data quality is not good, then do not select, even if there is no other point for that time. We are only interested in the good data at this point.
+    # The following rows preferentially select data where the device_id=64 (i.e the GLONASS over the Trimble).
+    # Also select by data quality (1 = good value, 2 = probably good value).
+    # If the data quality is not good, then do not select, even if there is no other point for that time.
+    # We are only interested in the good data at this point.
     if len(rows) >= 1 and rows[0]['device_id'] == 64 and rows[0]['measureland_qualifier_flag_overall'] == 1:
         return rows[0]
 
@@ -633,7 +594,8 @@ def choose_rows(rows):
     elif len(rows) >= 3 and rows[2]['device_id'] == 63 and rows[2]['measureland_qualifier_flag_overall'] == 1:
         return rows[2]
 
-    elif len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2: # for the first row which has a value of 3, because QC was not able to tell otherwise
+    elif len(rows) == 1 and rows[0]['measureland_qualifier_flag_overall'] == 2: # for the first row which has a value
+        # of 3, because QC was not able to tell otherwise
         return rows[0]
 
     return None
@@ -763,7 +725,7 @@ def get_stats(dataframe, variable):
     print("Mode of ", variable, " is: ", dataframe[variable].mode())
     print("Median of ", variable, " is: ", dataframe[variable].median())
 
-    # disregard points that are lower than 2.5 (to avoid stationary periods) as part of the interquartile range and greater than 100, which is only a few points anyway.
+    # For speed: disregard points that are lower than 2.5 (to avoid stationary periods) as part of the interquartile range and greater than 100, which is only a few points anyway.
     dataframeselection = dataframe.loc[(dataframe[variable] >= 2.5) & (dataframe[variable] < 100)]
     q1 = dataframeselection[variable].quantile(0.25)
     q3 = dataframeselection[variable].quantile(0.75)
