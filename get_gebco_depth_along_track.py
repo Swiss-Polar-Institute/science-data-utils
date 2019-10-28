@@ -2,38 +2,53 @@
 # ACE one-second resolution cruise track: https://doi.org/10.5281/zenodo.3260616
 # 30 arc-seconds, equivalent horizontal distances: https://www.ngdc.noaa.gov/mgg/topo/report/s6/s6A.html
 
-
-from osgeo import gdal
-import rasterio
 import rasterstats
-import geopandas as gpd
-
-raster_file1 = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO2014_0.0_-90.0_90.0_-30.0_30Sec_Geotiff.tif'
-raster_file2 = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO2014_-180.0_-90.0_-90.0_-30.0_30Sec_Geotiff.tif'
-raster_file3 = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO2014_-90.0_-90.0_0.0_-30.0_30Sec_Geotiff.tif'
-raster_file4 = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO2014_90.0_-90.0_180.0_-30.0_30Sec_Geotiff.tif'
-
-raster_joined = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO2014_geotiff_joined.tif'
-
-shapefile_201612='/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2016-12.shp'
-shapefile_201701='/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-01.shp'
-shapefile_201702='/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-02.shp'
-shapefile_201703='/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-03.shp'
-shapefile_201704='/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-04.shp'
-
-shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
-
-# Join all tiff together
+import ogr
+import geojson
+import csv
 
 
-points = gpd.read_file(shapefile_201612)
+def get_gebco_depth_from_shapefile_points(shapefile, raster, header, csvfile):
+    # Code below extract from https://gis.stackexchange.com/questions/46893/getting-pixel-value-of-gdal-raster-under-ogr-point-without-numpy
 
-for point in points:
-    print(point)
-    rasterstats.point_query(point, raster_joined)
+    csv_writer = csv.writer(csvfile)
+    csv_writer.writerow(header)
 
-print('------------------------------')
+    shapefile_dataset = ogr.Open(shapefile)
+    point_layer = shapefile_dataset.GetLayer()
 
-for shapefile in shapefile_list:
-    pts = rasterstats.point_query(shapefile, raster_joined)
-    print(pts)
+    for feat in point_layer:
+        geom = feat.GetGeometryRef()
+        lon, lat = geom.GetX(), geom.GetY()
+
+        depth = rasterstats.point_query(geojson.Point((lon, lat)), raster)[0]
+
+        csv_writer.writerow([lon, lat, depth])
+
+
+def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
+
+    for shapefile in shapefile_list:
+        get_gebco_depth_from_shapefile_points(shapefile, raster, header, csvfile)
+
+
+def main():
+
+    raster_joined = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO2014_geotiff_joined.tif'
+
+    shapefile_201612 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2016-12.shp'
+    shapefile_201701 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-01.shp'
+    shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-02.shp'
+    shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-03.shp'
+
+    shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
+
+    header = ['longitude', 'latitude', 'depth_m']
+    csvfile_out = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_with_depth.csv'
+
+    with open(csvfile_out, 'w') as csvfile:
+        process_list_of_shapefiles(shapefile_list, raster_joined, header, csvfile)
+
+
+if __name__ == "__main__":
+    main()
