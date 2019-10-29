@@ -6,34 +6,49 @@ import rasterstats
 import ogr
 import geojson
 import csv
+from progress_report import ProgressReport
 
 
 def get_gebco_depth_from_shapefile_points(shapefile, raster, header, csvfile):
     # Code below extract from https://gis.stackexchange.com/questions/46893/getting-pixel-value-of-gdal-raster-under-ogr-point-without-numpy
+    pass
+
+    # open shapefile and get points layer at which we want to get the seafloor depth
+    # shapefile_dataset = ogr.Open(shapefile)
+    # point_layer = shapefile_dataset.GetLayer()
+
+    # for each point layer get the point and then depth
+    # for feat in point_layer:
+    #     geom = feat.GetGeometryRef()
+    #     lon, lat = geom.GetX(), geom.GetY()
+    #
+    #     depth = rasterstats.point_query(geojson.Point((lon, lat)), raster)[0]
+    #
+    #     csv_writer.writerow([lon, lat, depth])
+
+
+
+
+
+
+def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
 
     # write to csv file as depth produced
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(header)
 
-    # open shapefile and get points layer at which we want to get the seafloor depth
-    shapefile_dataset = ogr.Open(shapefile)
-    point_layer = shapefile_dataset.GetLayer()
-
-    # for each point layer get the point and then depth
-    for feat in point_layer:
-        geom = feat.GetGeometryRef()
-        lon, lat = geom.GetX(), geom.GetY()
-
-        depth = rasterstats.point_query(geojson.Point((lon, lat)), raster)[0]
-
-        csv_writer.writerow([lon, lat, depth])
-
-
-def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
+    progress_report = ProgressReport(8_576_402)
 
     for shapefile in shapefile_list:
-        print('Processing ', shapefile)
-        get_gebco_depth_from_shapefile_points(shapefile, raster, header, csvfile)
+        print('------------- Processing', shapefile, ' -------------')
+
+        result = rasterstats.gen_point_query(shapefile, raster, geojson_out=True)
+
+        for r in result:
+            csv_writer.writerow(
+                [r['properties']['date_time'], r['properties']['latitude'], r['properties']['longitude'],
+                 r['properties']['value']])
+            progress_report.increment_and_print_if_needed()
 
 
 def main():
