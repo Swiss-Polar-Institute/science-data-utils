@@ -32,6 +32,7 @@ def get_gebco_depth_from_shapefile_points(shapefile, raster, header, csvfile):
 def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
 
     for shapefile in shapefile_list:
+        print('Processing ', shapefile)
         get_gebco_depth_from_shapefile_points(shapefile, raster, header, csvfile)
 
 
@@ -39,15 +40,15 @@ def main():
 
     raster_joined = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO2014_geotiff_joined.tif'
 
-    shapefile_201612 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2016-12.shp'
-    shapefile_201701 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-01.shp'
-    shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-02.shp'
-    shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_2017-03.shp'
+    shapefile_201612 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2016-12.shp'
+    shapefile_201701 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-01.shp'
+    shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-02.shp'
+    shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sce_2017-03.shp'
 
     shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
 
     header = ['longitude', 'latitude', 'depth_m']
-    csvfile_out = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1hour_with_depth.csv'
+    csvfile_out = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth.csv'
 
     with open(csvfile_out, 'w') as csvfile:
         process_list_of_shapefiles(shapefile_list, raster_joined, header, csvfile)
