@@ -58,7 +58,7 @@ def main():
     shapefile_201612 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2016-12.shp'
     shapefile_201701 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-01.shp'
     shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-02.shp'
-    shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sce_2017-03.shp'
+    shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-03.shp'
 
     shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
 
