@@ -16,8 +16,11 @@ def process_file(input_date_time_filepath, output_filepath):
         for row in filereader:
             print(row[0])
             position = datetime_to_position.datetime_text_to_position(row[0])
-            print(position)
-            output_file.write("{}, {}, {}\n".format(row[0], position[0], position[1]))
+            if position is None:
+                output_file.write("{}, {}, {}\n".format(row[0], None, None))
+            else:
+                print(position)
+                output_file.write("{}, {}, {}\n".format(row[0], position[0], position[1]))
 
     output_file.close()
 
