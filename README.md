@@ -21,7 +21,9 @@ In order to simply extract the latitude and longitude from the cruise track data
 This util gets a datetime and finds an associated position from an SQLite database. 
 
 Input: a datetime in the ISO 8601 format YYYY-MM-DDThh:mm:ss, eg. 2010-03-12T06:44:38
+
 Output: a position (latitude and longitude in decimal degrees)
+
 Uses: an SQLite database that contains timestamped positions
 
 #### get_positions_for_times_in_file.py
@@ -29,7 +31,9 @@ Uses: an SQLite database that contains timestamped positions
 This util gets a list of datetimes in a file, finds the associated position from an SQLite database and outputs a file containing the datetime and position.
 
 Input: a csv file with a list of dates and times in the ISO 8601 format YYYY-MM-DDThh:mm:ss, eg. 2010-03-12T06:44:38
+
 Output: a csv file with a list of dates and times, and their respective latitudes and longitudes that are found from an SQLite database. 
+
 Uses: an SQLite database that contains timestamped positions that is used from datetime_to_position.py
 
 ## Credits
