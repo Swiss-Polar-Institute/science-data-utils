@@ -1,5 +1,9 @@
-# Source data: GEBCO 30 second arc gridded bathymetry data https://www.gebco.net/data_and_products/gridded_bathymetry_data/gebco_30_second_grid/ The GEBCO_2014 Grid, version 20150318, http://www.gebco.net
-# ACE one-second resolution cruise track: https://doi.org/10.5281/zenodo.3260616
+# Source data: GEBCO 30 second arc gridded bathymetry data: The GEBCO_2014 Grid, version 20150318, http://www.gebco.net
+
+# ACE one-second resolution cruise track: Thomas, Jenny, & Pina Estany, Carles. (2019). Quality-checked, one-second
+# cruise track of the Antarctic Circumnavigation Expedition (ACE) undertaken during the austral summer of 2016/2017.
+# (Version 1.0) [Data set]. Zenodo. http://doi.org/10.5281/zenodo.3260616
+
 # 30 arc-seconds, equivalent horizontal distances: https://www.ngdc.noaa.gov/mgg/topo/report/s6/s6A.html
 
 import rasterstats
