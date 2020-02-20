@@ -11,30 +11,35 @@
 import csv
 
 from progress_report import ProgressReport
-from netCDF4 import Dataset, num2date, date2index
+from netCDF4 import Dataset
 
 
 def near(array, value):
+    """Find the nearest point within the array and return its index"""
+
     idx = (abs(array - value)).argmin()
     return idx
 
 
 def process_cruise_track(track_data_list, netcdf_file, header, csvfile):
+    """Process each cruise track file, get the depth from the NetCDF file and output it into a csvfile"""
 
     # write to csv file as depth produced
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(header)
 
-    progress_report = ProgressReport(8_576_402)
+    # provide progress whilst processing: number given is the total number of lines in the shapefiles
+    progress_report = ProgressReport(9_499_414)
 
+    # process each of the track files
     for track_file in track_data_list:
         print('------------- Processing', track_file, ' -------------')
 
         get_depth_along_track_from_netcdf(netcdf_file, track_file, csv_writer, progress_report)
 
 
-
 def get_depth_along_track_from_netcdf(netcdf_file, track_data, csv_writer, progress_report):
+    """For each point get the depth from the NetCDF file and output it in a csv file"""
 
     # get the cruise track points
     csv_file = open(track_data)
@@ -55,8 +60,8 @@ def get_depth_along_track_from_netcdf(netcdf_file, track_data, csv_writer, progr
         latitude = float(sline[1])
         longitude = float(sline[2])
 
-        # get the indexes of the lat and lon to find the corresponding value of depth in the netcdf file. This finds
-        # the nearest lat and lon as there is unlikely to be the exact values in the netcdf file.
+        # get the indexes of the lat and lon to find the corresponding value of depth in the NetCDF file. This finds
+        # the nearest lat and lon as there is unlikely to be the exact values in the NetCDF file. Return the indices.
         ilat = near(netcdf_data.variables['lat'][:], latitude)
         ilon = near(netcdf_data.variables['lon'][:], longitude)
 
@@ -65,6 +70,7 @@ def get_depth_along_track_from_netcdf(netcdf_file, track_data, csv_writer, progr
 
         result = [date_time, latitude, longitude, depth]
 
+        # write the result to the csv file
         csv_writer.writerow(result)
         progress_report.increment_and_print_if_needed()
 
