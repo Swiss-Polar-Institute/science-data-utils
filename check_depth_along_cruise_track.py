@@ -35,12 +35,7 @@ def file_to_position_depths(file_path):
             if depth == '':
                 continue
 
-            # if depth is not a float then continue and print the line number to be able to identify it
-            try:
-                result[lat_long] = float(depth)
-            except ValueError:
-                print('Line:', count)
-                print(line)
+            result[lat_long] = float(depth)
 
     return result
 
@@ -63,6 +58,10 @@ def yield_difference(file_path, position_depths):
             date, lat, long, depth = line
 
             lat_long = (float(lat), float(long))
+
+            # if the depth is empty, then continue
+            if depth == '':
+                continue
             depth = float(depth)
 
             other_file_depth = position_depths.get(lat_long, None)
@@ -139,4 +138,4 @@ if __name__ == '__main__':
     difference_csv_outfile = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_depth_differences_rtopo204_gebco2019.csv'
     large_csv_outfile = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_depth_differences_rtopo204_gebco2019_greater_than_100m.csv'
 
-    calculate_differences_and_write_out(gebco_csv, rtopo204_csv, difference_csv_outfile, large_csv_outfile)
+    calculate_differences_and_write_out(rtopo204_csv, gebco_csv, difference_csv_outfile, large_csv_outfile)
