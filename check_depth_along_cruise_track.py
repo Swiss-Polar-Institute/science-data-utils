@@ -114,6 +114,8 @@ def calculate_differences_and_write_out(depth1_file, depth2_file, differences_cs
 
     differences = get_depth_differences(depth1_file, depth2_file)
 
+    differences = list(differences)
+
     with open(differences_csvfile, 'w') as differencescsvfile:
         write_csv_depth_differences(differences, differencescsvfile)
 
@@ -130,6 +132,8 @@ def create_dataframe(depth1_file, depth2_file):
 
     print(df.head())
 
+    return df
+
 
 if __name__ == '__main__':
     gebco_csv = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth_gebco2019.csv'
@@ -137,5 +141,7 @@ if __name__ == '__main__':
 
     difference_csv_outfile = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_depth_differences_rtopo204_gebco2019.csv'
     large_csv_outfile = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_depth_differences_rtopo204_gebco2019_greater_than_100m.csv'
+
+    depth_data = create_dataframe(rtopo204_csv, gebco_csv)
 
     calculate_differences_and_write_out(rtopo204_csv, gebco_csv, difference_csv_outfile, large_csv_outfile)
