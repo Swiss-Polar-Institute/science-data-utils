@@ -68,7 +68,7 @@ def write_csv_large_differences(depth1_file, depth2_file, csv_outfile):
 
     for difference in differences:
         if difference[5] is not None:
-            if abs(difference[5]) > 100:
+            if abs(difference[5]) > 1000:
                 csv_writer.writerow(difference)
 
 
@@ -91,7 +91,9 @@ if __name__ == '__main__':
     gebco_csv = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth_gebco2019.csv'
     rtopo204_csv = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth_rtopo2.0.4.csv'
 
-    csv_outfile = '/home/jen/projects/ace_data_management/mapping/data/depth_differences_greater_than_100.csv'
+    #csv_outfile = '/home/jen/projects/ace_data_management/mapping/data/depth_differences_greater_than_100.csv'
+    csv_outfile = '/home/jen/projects/ace_data_management/mapping/data/depth_differences_greater_than_1000.csv'
+
 
     with open(csv_outfile, 'w') as csvfile:
         write_csv_large_differences(gebco_csv, rtopo204_csv, csvfile)
