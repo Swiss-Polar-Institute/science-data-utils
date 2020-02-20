@@ -1,4 +1,13 @@
-import netCDF4
+# Source bathymetry RTopo2.0.4 data set: Schaffer, Janin; Timmermann, Ralph; Arndt, Jan Erik; Rosier, Sebastian H R;
+# Anker, Paul G D; Callard, S Louise; Davis, Peter E D; Dorschel, Boris; Grob, Henrik; Hattermann, Tore; Hofstede,
+# Coen M; Kanzow, Torsten; Kappelsberger, Maria; Lloyd, Jerry M; Ó'Cofaigh, Colm; Roberts, David H (2019): An update
+# to Greenland and Antarctic ice sheet topography, cavity geometry, and global bathymetry (RTopo-2.0.4). PANGAEA,
+# https://doi.org/10.1594/PANGAEA.905295
+
+# ACE one-second resolution cruise track: Thomas, Jenny, & Pina Estany, Carles. (2019). Quality-checked, one-second
+# cruise track of the Antarctic Circumnavigation Expedition (ACE) undertaken during the austral summer of 2016/2017.
+# (Version 1.0) [Data set]. Zenodo. http://doi.org/10.5281/zenodo.3260616
+
 import csv
 
 from progress_report import ProgressReport
