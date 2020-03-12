@@ -21,6 +21,7 @@ class DatetimeToPosition(object):
         return self.datetime_text_to_position(datetime_datetime.strftime("%Y-%m-%dT%H:%M:%S"))
 
     def datetime_text_to_position(self, datetime_text):
+        datetime_text = datetime_text.replace(' ', 'T')
         approximation = datetime_text + "%"
         self.sqlite3_cur.execute('SELECT latitude,longitude FROM gps where date_time like ?', (approximation, ))
 
