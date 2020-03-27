@@ -17,9 +17,6 @@ import numpy as np
 input_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/raw/"
 output_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
 
-### List data files
-
-# Get the set of raw motion data files in a list.
 
 def get_input_txt_files(input_data_folder):
     """Create a list of files in a directory and put them into a list."""
@@ -37,18 +34,13 @@ def get_input_txt_files(input_data_folder):
     return list_data_files
 
 
-### Check file headers
-
-# The expected header is defined in order to compare that within each file (note that this ignores the first four lines).
-
-
 def check_file_header(list_data_files): 
     """
     Check that the header for each of the files in the list is as expected. If it is correct, add one to the number
     of correct headers that is output and if incorrect, output the filename and a copy of the header line.
     Also add one to the number of incorrect headers.
     """
-    
+
     correct_headers = 0
     incorrect_headers = 0
     total_number_files = len(list_data_files)
@@ -80,12 +72,12 @@ def check_file_header(list_data_files):
     print("Total number of files: ", total_no_files)
 
 
-### Get the date of the data collection and read the data into a list
-
-
 def read_motion_file_date(filename):
-    """Read a file and get the date from the second line in the header. Output the date in the given format."""
-    
+    """
+    Read a file and get the date from the second line in the header. This is equivalent to the date of data collection.
+    Output the date in the given format.
+    """
+
     with open(filename, 'r', encoding="ISO-8859-1") as data_file: # need encoding because of degree characters
         data_file.readline() # skips first line
         date_line = data_file.readline()
@@ -96,7 +88,11 @@ def read_motion_file_date(filename):
     
     
 def optimise_line(line):
-    """Convert the values in a line of data that look like numbers, to floats (to optimise the memory usage and make the next stage more efficient). If the value is not a number, then leave it in its original format."""
+    """
+    Convert the values in a line of data that look like numbers, to floats (to optimise the memory usage and make
+    the next stage more efficient). If the value is not a number, then leave it in its original format.
+    """
+
     for i, value in enumerate(line):
         try:
             line[i] = float(line[i])
@@ -105,8 +101,10 @@ def optimise_line(line):
         
 
 def data_to_list(filename, rows_of_data):
-    """Read files from a list of files, get the date from each file, then append the date to each line within the
-    file as the line of data is read into a list. Output a list of data from all of the files."""
+    """
+    Read files contained in a list of files, get the date from each file, then append the date to each line within the
+    file as the line of data is read into a list. Output a list of data from all of the files.
+    """
 
     date_of_file = read_motion_file_date(filename)
 
@@ -137,14 +135,11 @@ def data_to_list(filename, rows_of_data):
     return rows_of_data
 
 
-### Define the column headers
-
-
-# Get the header for the columns so that this can be assigned to the data frame. Currently this is listed in a csv file so that it can be changed and reimported as necessary. The data contains more columns than are listed in the header in the data files, so we need to ensure that these are assigned correctly in the pandas data frame. 
-
-
 def define_column_headers(header_file):
-    """Import a list of column headers from a csv file and output them as a list to be ready to be set as the column headers for a pandas data frame."""
+    """
+    Import a list of column headers from a csv file and output them as a list to be ready to be set as the column
+    headers for a pandas data frame.
+    """
 
     header = []
 
@@ -158,8 +153,6 @@ def define_column_headers(header_file):
     return header
 
 
-### Create data frame and import data
-
 def data_to_dataframe(rows_of_data, dataframe, header):
     """Import a list of data into a pandas dataframe and use a list of column names as the header."""
     
@@ -168,29 +161,19 @@ def data_to_dataframe(rows_of_data, dataframe, header):
     return dataframe
 
 
-# Optimise memory usage in the dataframe by converting float64 to float32 (uses less bytes per digit).
-
-
-
 def reduce_memory_usage(props):
-    """Takes a dataframe and converts the data type of each float to float64 (oroignally did it to float32 but wanted
-    more dp for lat and lon, reducing the memory usage.
+    """
+    Takes a dataframe and converts the data type of each float to float64 (originally did it to float32 but wanted
+    more dp for lat and lon), reducing the memory usage.
 
     The code below was taken from https://www.kaggle.com/arjanso/reducing-dataframe-memory-size-by-65 and is used to
     convert the datatype to one that uses less memory.
     """
-    
-    #start_mem_usg = props.memory_usage().sum() / 1024**2 
-    #print("Memory usage of properties dataframe is :",start_mem_usg," MB")
+
     NAlist = [] # Keeps track of columns that have missing values filled in. 
     for col in props.columns:
         if props[col].dtype != object:  # Exclude strings
-            
-            # Print current column type
-            #print("******************************")
-            #print("Column: ",col)
-            #print("dtype before: ",props[col].dtype)
-            
+
             # make variables for Int, max and min
             IsInt = False
             mx = props[col].max()
@@ -208,7 +191,6 @@ def reduce_memory_usage(props):
             if result > -0.01 and result < 0.01:
                 IsInt = True
 
-            
             # Make Integer/unsigned Integer datatypes
             if IsInt:
                 if mn >= 0:
@@ -230,35 +212,26 @@ def reduce_memory_usage(props):
                     elif mn > np.iinfo(np.int64).min and mx < np.iinfo(np.int64).max:
                         props[col] = props[col].astype(np.int64)    
             
-            # Make float datatypes 32 bit
+            # Make float datatypes 64 bit
             else:
                 props[col] = props[col].astype(np.float64) # changed this from float32 to avoid losing the accuracy of the latitude and longitude
-            
-            # Print new column type
-            #print("dtype after: ",props[col].dtype)
-            #print("******************************")
-            
-    # Print final result
-    #print("___MEMORY USAGE AFTER COMPLETION:___")
-    #mem_usg = props.memory_usage().sum() / 1024**2 
-    #print("Memory usage is: ",mem_usg," MB")
-    #print("This is ",100*mem_usg/start_mem_usg,"% of the initial size")
+
     return props, NAlist
 
 
-### Output the data into csv files with one file per date.
-
-
 def output_daily_files(dataframe, output_data_folder):
-    """Output a pandas dataframe to a files where each file contains one day's worth of data. Output the data file to the output data folder."""
+    """
+    Output a pandas dataframe to files where each file contains one day's worth of data.
+    Output the data file to the output data folder.
+    """
     
     output_filename_base = 'ace_hydrins_'
 
     date_group = dataframe.groupby('pc_date_utc')
-    print("Aggregated groups by date with counts:")
-    print(dataframe.groupby('pc_date_utc').size())
-    print("\nTotal number of records:")
-    print(dataframe.groupby('pc_date_utc').size().sum())
+    # print("Aggregated groups by date with counts:")
+    # print(dataframe.groupby('pc_date_utc').size())
+    # print("\nTotal number of records:")
+    # print(dataframe.groupby('pc_date_utc').size().sum())
     
     for date in date_group.groups:
         date_formatted = datetime.datetime.strptime(date, "%Y-%m-%d")    
@@ -275,7 +248,8 @@ def output_daily_files(dataframe, output_data_folder):
 
 
 def get_input_files(input_data_folder):
-    
+    """ Get a list of the files in the input directory."""
+
     list_data_files = []
     
     os.chdir(input_data_folder)
@@ -290,6 +264,7 @@ def get_input_files(input_data_folder):
 
 
 def check_rows_in_file(list_data_files):
+    """Get the number of rows in a file, where the file is in a list of files. Output the number of rows."""
 
     total_rows = 0
     for filepath in list_data_files:
@@ -313,7 +288,10 @@ def check_rows_in_file(list_data_files):
 
 if __name__ == "__main__":
 
-    expected_header = ['Pc - HH:MM:SS.SSS', 'Hydrins - HH:MM:SS.SSS', 'Heading (°)', 'Roll (°)', 'Pitch (°)', 'Heading std. dev. (°)', 'Roll std. dev. (°)', 'Pitch std. dev. (°)', 'North speed (m/s)', 'East speed (m/s)', 'Vert. speed (m/s)', 'Speed norm (knots)', 'North speed std. dev. (m/s)', 'East speed std. dev. (m/s)', 'Vert. speed std. dev. (m/s)', 'Latitude (°)', 'Longitude (°)', 'Altitude (m)', 'Latitude std. dev. (m)', 'Longitude std. dev. (m)', 'Altitude std. dev. (m)', 'Zone I', 'Zone C', 'UTM North (m)', 'UTM East (m)', 'UTM altitude  (m)', 'High level status', 'System status 1', 'System status 2', 'Algo status 1', 'Algo status 2', 'GPS - Latitude (°)', 'GPS - Longitude (°)', 'GPS - Altitude (m)', 'GPS - Mode', 'GPS - Time', 'Manual GPS - Latitude (°)', 'Manual GPS - Longitude (°)', 'Manual GPS - Altitude (m)', 'Manual GPS - Latitude std. dev.', 'Manual GPS - Longitude std. dev.', 'Manual GPS - Altitude std. dev.', '']    
+    expected_header = ['Pc - HH:MM:SS.SSS', 'Hydrins - HH:MM:SS.SSS', 'Heading (°)', 'Roll (°)', 'Pitch (°)', 'Heading std. dev. (°)', 'Roll std. dev. (°)', 'Pitch std. dev. (°)', 'North speed (m/s)', 'East speed (m/s)', 'Vert. speed (m/s)', 'Speed norm (knots)', 'North speed std. dev. (m/s)', 'East speed std. dev. (m/s)', 'Vert. speed std. dev. (m/s)', 'Latitude (°)', 'Longitude (°)', 'Altitude (m)', 'Latitude std. dev. (m)', 'Longitude std. dev. (m)', 'Altitude std. dev. (m)', 'Zone I', 'Zone C', 'UTM North (m)', 'UTM East (m)', 'UTM altitude  (m)', 'High level status', 'System status 1', 'System status 2', 'Algo status 1', 'Algo status 2', 'GPS - Latitude (°)', 'GPS - Longitude (°)', 'GPS - Altitude (m)', 'GPS - Mode', 'GPS - Time', 'Manual GPS - Latitude (°)', 'Manual GPS - Longitude (°)', 'Manual GPS - Altitude (m)', 'Manual GPS - Latitude std. dev.', 'Manual GPS - Longitude std. dev.', 'Manual GPS - Altitude std. dev.', '']
+
+    # Get the header for the columns so that this can be assigned to the data frame.
+    # Currently this is listed in a csv file so that it can be changed and reimported as necessary.
 
     header_file = "/home/jen/projects/ace_data_management/wip/motion_data/file_header.csv"
     header = define_column_headers(header_file)
@@ -323,9 +301,11 @@ if __name__ == "__main__":
 
     #test_input_data_folder = "/home/jen/projects/ace_data_management/ship_data/motion_data/test/"
 
+    # Get the set of raw motion data files in a list.
     list_motion_data_files = get_input_txt_files(input_data_folder)
     print(len(list_motion_data_files))
 
+    # Check the headers of the input files
     print("Checking headers of files")
     print("\n")
 
@@ -350,7 +330,7 @@ if __name__ == "__main__":
         no_files_processed += 1
         print("Processed", no_files_processed, "out of", total_no_files)
    
-#    Pickle the dataframe (output it to a file to remove it from the memory) and check the memory usage again.
+# Pickle the dataframe (output it to a file to remove it from the memory) and check the memory usage again.
 
     motiondf.to_pickle(output_data_folder + "motiondf.pkl")
 
@@ -363,7 +343,7 @@ if __name__ == "__main__":
 
     output_daily_files(motiondf, output_data_folder)
 
-# Check the output files
+# Check the output files contain the correct number of lines
 
     data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
 
