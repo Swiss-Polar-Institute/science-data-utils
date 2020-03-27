@@ -16,6 +16,14 @@ In order to simply extract the latitude and longitude from the cruise track data
 
 ### Some specific utils are described below:
 
+#### ace_motion_data.py
+
+This util gets the raw ACE motion data files which are in text format and outputs them into more user-friendly csv files. 
+
+Input: raw text files, which were output from a Hydrins Inertial Navigation instrument on board the R/V Akademik Tryoshnikov during the Antarctic Circumnavigation Expedition (ACE). The files contain different "amounts" of data, which are not always daily. Data is at a resolution of one second.
+
+Output: daily csv files containing one-second resolution data. Data are only parsed from the text file input - there is no data processing that is undertaken.
+
 #### check_depth_along_cruise_track.py
 
 This util compares the sea floor depth from two similar files along a cruise track.

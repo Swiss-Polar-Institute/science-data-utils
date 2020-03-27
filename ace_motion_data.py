@@ -11,11 +11,24 @@ import pandas
 import datetime
 import time
 import numpy as np
+import argparse
+
+def get_filepaths():
+    """Get the inputs from the user"""
+
+    parser = argparse.ArgumentParser(description="Input the arguments")
+
+    parser.add_argument("input_data_folder", help="Full filepath to where input dataset is")
+    parser.add_argument("output_data_folder", help="Full filepath to where output dataset goes")
+
+    args = parser.parse_args()
+    return args
+
 
 # Set up the hard-coded variables to import the data.
 
-input_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/raw/"
-output_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
+#input_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/raw/"
+#output_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
 
 
 def get_input_txt_files(input_data_folder):
@@ -288,6 +301,8 @@ def check_rows_in_file(list_data_files):
 
 if __name__ == "__main__":
 
+    args = get_filepaths()
+
     expected_header = ['Pc - HH:MM:SS.SSS', 'Hydrins - HH:MM:SS.SSS', 'Heading (°)', 'Roll (°)', 'Pitch (°)', 'Heading std. dev. (°)', 'Roll std. dev. (°)', 'Pitch std. dev. (°)', 'North speed (m/s)', 'East speed (m/s)', 'Vert. speed (m/s)', 'Speed norm (knots)', 'North speed std. dev. (m/s)', 'East speed std. dev. (m/s)', 'Vert. speed std. dev. (m/s)', 'Latitude (°)', 'Longitude (°)', 'Altitude (m)', 'Latitude std. dev. (m)', 'Longitude std. dev. (m)', 'Altitude std. dev. (m)', 'Zone I', 'Zone C', 'UTM North (m)', 'UTM East (m)', 'UTM altitude  (m)', 'High level status', 'System status 1', 'System status 2', 'Algo status 1', 'Algo status 2', 'GPS - Latitude (°)', 'GPS - Longitude (°)', 'GPS - Altitude (m)', 'GPS - Mode', 'GPS - Time', 'Manual GPS - Latitude (°)', 'Manual GPS - Longitude (°)', 'Manual GPS - Altitude (m)', 'Manual GPS - Latitude std. dev.', 'Manual GPS - Longitude std. dev.', 'Manual GPS - Altitude std. dev.', '']
 
     # Get the header for the columns so that this can be assigned to the data frame.
@@ -302,7 +317,7 @@ if __name__ == "__main__":
     #test_input_data_folder = "/home/jen/projects/ace_data_management/ship_data/motion_data/test/"
 
     # Get the set of raw motion data files in a list.
-    list_motion_data_files = get_input_txt_files(input_data_folder)
+    list_motion_data_files = get_input_txt_files(args.input_data_folder)
     print(len(list_motion_data_files))
 
     # Check the headers of the input files
@@ -332,21 +347,21 @@ if __name__ == "__main__":
    
 # Pickle the dataframe (output it to a file to remove it from the memory) and check the memory usage again.
 
-    motiondf.to_pickle(output_data_folder + "motiondf.pkl")
+    motiondf.to_pickle(args.output_data_folder + "motiondf.pkl")
 
     motiondf.reset_index(drop=True, inplace=True)
-    motiondf.to_pickle(output_data_folder + "motiondf_noindex.pkl") 
+    motiondf.to_pickle(args.output_data_folder + "motiondf_noindex.pkl")
 
 # Output the data files from the dataframe into daily files. 
  
-    motiondf = pandas.read_pickle(output_data_folder + 'motiondf_noindex.pkl')
+    motiondf = pandas.read_pickle(args.output_data_folder + 'motiondf_noindex.pkl')
 
-    output_daily_files(motiondf, output_data_folder)
+    output_daily_files(motiondf, args.output_data_folder)
 
 # Check the output files contain the correct number of lines
 
-    data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
+    #data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
 
-    list_data_files_to_check = get_input_files(data_folder)
+    list_data_files_to_check = get_input_files(args.input_data_folder)
 
     check_rows_in_file(list_data_files_to_check)
