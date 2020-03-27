@@ -173,8 +173,9 @@ def reduce_memory_usage(props):
     Takes a dataframe and converts the data type of each float to float64 (originally did it to float32 but wanted
     more dp for lat and lon), reducing the memory usage.
 
-    The code below was taken from https://www.kaggle.com/arjanso/reducing-dataframe-memory-size-by-65 and is used to
-    convert the datatype to one that uses less memory.
+    The code below was modified from https://www.kaggle.com/arjanso/reducing-dataframe-memory-size-by-65 and is used to
+    convert the datatype to one that uses less memory. This code was provided with an Apache 2.0 license:
+    http://www.apache.org/licenses/LICENSE-2.0
     """
 
     NAlist = [] # Keeps track of columns that have missing values filled in. 
@@ -189,7 +190,7 @@ def reduce_memory_usage(props):
             # Integer does not support NA, therefore, NA needs to be filled
             if not np.isfinite(props[col]).all(): 
                 NAlist.append(col)
-                props[col].fillna(mn-1,inplace=True)  
+                props[col].fillna(mn-1, inplace=True)
                    
             # test if column can be converted to an integer
             asint = props[col].fillna(0).astype(np.int64)
