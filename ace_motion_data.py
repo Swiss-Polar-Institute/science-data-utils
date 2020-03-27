@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-# This notebook imports the motion data collected on board the R/V Akademik Tryoshnikov during the Antarctic Circumnavigation Expedition (ACE).
+# This code imports the raw motion data collected on board the R/V Akademik Tryoshnikov during the Antarctic
+# Circumnavigation Expedition (ACE) and exports it as comma-separated values files.
  
 # Import required packages
 
@@ -9,13 +10,12 @@ import os
 import pandas
 import datetime
 import time
-import io
 import numpy as np
 
 # Set up the hard-coded variables to import the data.
 
-input_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/raw/"
-output_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/check_20200326/"
+input_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/raw/"
+output_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
 
 ### List data files
 
@@ -43,7 +43,11 @@ def get_input_txt_files(input_data_folder):
 
 
 def check_file_header(list_data_files): 
-    """Check that the header for each of the files in the list is as expected. If it is correct, add one to the number of correct headers that is output and if incorrect, output the filename and a copy of the header line. Also add one to the number of incorrect headers."""
+    """
+    Check that the header for each of the files in the list is as expected. If it is correct, add one to the number
+    of correct headers that is output and if incorrect, output the filename and a copy of the header line.
+    Also add one to the number of incorrect headers.
+    """
     
     correct_headers = 0
     incorrect_headers = 0
@@ -101,7 +105,8 @@ def optimise_line(line):
         
 
 def data_to_list(filename, rows_of_data):
-    """Read files from a list of files, get the date from each file, then append the date to each line within the file as the line of data is read into a list. Output a list of data from all of the files."""
+    """Read files from a list of files, get the date from each file, then append the date to each line within the
+    file as the line of data is read into a list. Output a list of data from all of the files."""
 
     date_of_file = read_motion_file_date(filename)
 
@@ -158,18 +163,22 @@ def define_column_headers(header_file):
 def data_to_dataframe(rows_of_data, dataframe, header):
     """Import a list of data into a pandas dataframe and use a list of column names as the header."""
     
-    dataframe = dataframe.append(pandas.DataFrame(rows_of_data, columns = header), ignore_index = True)
+    dataframe = dataframe.append(pandas.DataFrame(rows_of_data, columns=header), ignore_index=True)
     
     return dataframe
 
 
 # Optimise memory usage in the dataframe by converting float64 to float32 (uses less bytes per digit).
 
-# The code below was taken from https://www.kaggle.com/arjanso/reducing-dataframe-memory-size-by-65 and is used to convert the datatype to one that uses less memory.
 
 
 def reduce_memory_usage(props):
-    """Takes a dataframe and converts the data type of each float to float64 (oroignally did it to float32 but wanted more dp for lat and lon, reducing the memory usage."""
+    """Takes a dataframe and converts the data type of each float to float64 (oroignally did it to float32 but wanted
+    more dp for lat and lon, reducing the memory usage.
+
+    The code below was taken from https://www.kaggle.com/arjanso/reducing-dataframe-memory-size-by-65 and is used to
+    convert the datatype to one that uses less memory.
+    """
     
     #start_mem_usg = props.memory_usage().sum() / 1024**2 
     #print("Memory usage of properties dataframe is :",start_mem_usg," MB")
@@ -309,6 +318,9 @@ if __name__ == "__main__":
     header_file = "/home/jen/projects/ace_data_management/wip/motion_data/file_header.csv"
     header = define_column_headers(header_file)
 
+    print("Expected header: ", len(expected_header))
+    print("Header: ", len(header))
+
     #test_input_data_folder = "/home/jen/projects/ace_data_management/ship_data/motion_data/test/"
 
     list_motion_data_files = get_input_txt_files(input_data_folder)
@@ -322,11 +334,11 @@ if __name__ == "__main__":
     print("List contains ",  len(list_motion_data_files), "files")
 
     rows_of_data = list()
-    motiondf = pandas.DataFrame(columns = header)
+    motiondf = pandas.DataFrame(columns=header)
 
     no_files_processed = 0
     for filename in list_motion_data_files:
-        print(filename)
+        print("Working on ", filename)
         total_no_files = len(list_motion_data_files)
     
         data_to_list(filename, rows_of_data)
@@ -353,7 +365,7 @@ if __name__ == "__main__":
 
 # Check the output files
 
-    data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/check_20200326/"
+    data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
 
     list_data_files_to_check = get_input_files(data_folder)
 
