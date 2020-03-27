@@ -25,12 +25,6 @@ def get_filepaths():
     return args
 
 
-# Set up the hard-coded variables to import the data.
-
-#input_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/raw/"
-#output_data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
-
-
 def get_input_txt_files(input_data_folder):
     """Create a list of files in a directory and put them into a list."""
     
@@ -314,8 +308,6 @@ if __name__ == "__main__":
     print("Expected header: ", len(expected_header))
     print("Header: ", len(header))
 
-    #test_input_data_folder = "/home/jen/projects/ace_data_management/ship_data/motion_data/test/"
-
     # Get the set of raw motion data files in a list.
     list_motion_data_files = get_input_txt_files(args.input_data_folder)
     print(len(list_motion_data_files))
@@ -345,22 +337,20 @@ if __name__ == "__main__":
         no_files_processed += 1
         print("Processed", no_files_processed, "out of", total_no_files)
    
-# Pickle the dataframe (output it to a file to remove it from the memory) and check the memory usage again.
+    # Pickle the dataframe (output it to a file to remove it from the memory) and check the memory usage again.
 
     motiondf.to_pickle(args.output_data_folder + "motiondf.pkl")
 
     motiondf.reset_index(drop=True, inplace=True)
     motiondf.to_pickle(args.output_data_folder + "motiondf_noindex.pkl")
 
-# Output the data files from the dataframe into daily files. 
+    # Output the data files from the dataframe into daily files.
  
     motiondf = pandas.read_pickle(args.output_data_folder + 'motiondf_noindex.pkl')
 
     output_daily_files(motiondf, args.output_data_folder)
 
-# Check the output files contain the correct number of lines
-
-    #data_folder = "/home/jen/projects/ace_data_management/wip/motion_data/test/csv/"
+    # Check the output files contain the correct number of lines
 
     list_data_files_to_check = get_input_files(args.input_data_folder)
 
