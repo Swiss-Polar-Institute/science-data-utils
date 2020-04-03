@@ -1,0 +1,46 @@
+pc_date_utc
+pc_time_hhmmsssss
+hydrins_time_hhmmsssss
+heading
+platform_roll
+platform_pitch
+heading_std_dev
+platform_roll_std_dev
+platform_pitch_std_dev
+north_speed_ms-1
+east_speed_ms-1
+vertical_speed_ms-1
+speed_norm_knots
+north_speed_std_dev_ms-1
+east_speed_std_dev_ms-1
+vertical_speed_std_dev_ms-1
+latitude
+longitude
+altitude_m
+latitude std dev_m
+longitude std dev_m
+altitude std dev_m
+zone_i
+zone_c
+utm_north_m
+utm_east_m
+utm_altitude_m
+high_level_status
+system_status_1
+system_status_2
+algo_status_1
+algo_status_2
+gps_latitude
+gps_longitude
+gps_altitude_m
+gps_mode
+gps_time
+manual_gps_latitude
+manual_gps_longitude
+manual_gps_altitude_m
+manual_gps_latitude_std_dev
+manual_gps_longitude_std_dev
+manual_gps_altitude_std_dev_m
+unknown1
+unknown2
+unknown3
