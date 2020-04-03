@@ -303,7 +303,7 @@ if __name__ == "__main__":
     # Get the header for the columns so that this can be assigned to the data frame.
     # Currently this is listed in a csv file so that it can be changed and reimported as necessary.
 
-    header_file = "/home/jen/projects/ace_data_management/wip/motion_data/file_header.csv"
+    header_file = "inertial_navigation_file_header.csv"
     header = define_column_headers(header_file)
 
     print("Expected header: ", len(expected_header))
