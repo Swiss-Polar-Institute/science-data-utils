@@ -19,11 +19,7 @@ def get_list_of_shapefiles(input_cruise_track_data_dir):
     # /home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/shapefiles
 
     filepath = os.path.join(input_cruise_track_data_dir, "*.shp")
-    files = glob.glob(filepath)
-
-    file_list = []
-    for file in files:
-        file_list.append(file)
+    file_list = glob.glob(filepath)
 
     print(file_list)
 
@@ -68,6 +64,7 @@ def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
 
 
 def process_files(input_cruise_track_data_dir, raster_joined, csvfile_out):
+
     shapefile_list = get_list_of_shapefiles(input_cruise_track_data_dir)
 
     # use one raster file that contains all data
@@ -78,10 +75,10 @@ def process_files(input_cruise_track_data_dir, raster_joined, csvfile_out):
     # shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-02.shp'
     # shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-03.shp'
 
-    shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
+    # shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
 
     header = ['date_time', 'latitude', 'longitude', 'depth_m']
-    csvfile_out = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth_gebco2019.csv'
+    # csvfile_out = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth_gebco2019.csv'
 
     with open(csvfile_out, 'w') as csvfile:
         process_list_of_shapefiles(shapefile_list, raster_joined, header, csvfile)
