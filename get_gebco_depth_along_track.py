@@ -17,10 +17,11 @@ import subprocess
 
 def get_list_of_shapefiles(input_cruise_track_data_dir):
     """Get directory of shapefiles and create a list of the files"""
-    # /home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/shapefiles
 
     filepath = os.path.join(input_cruise_track_data_dir, "*.shp")
     file_list = glob.glob(filepath)
+
+    file_list.sort()
 
     return file_list
 
@@ -32,7 +33,6 @@ def join_tifs(file_dir, input_filename, merged_file):
     files = glob.glob(filepath)
 
     subprocess.run(['rasterio', 'merge'] + files + [merged_file])
-
 
 
 def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
@@ -64,11 +64,7 @@ def process_files(input_cruise_track_data_dir, input_gebco_data_dir, input_bathy
 
     print('Creating list of shapefiles')
     shapefile_list = get_list_of_shapefiles(input_cruise_track_data_dir)
-
-    # testing tif join
-    # file_dir = "/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO_2019_12_Nov_2019_356b1e29d3e1/"
-    # input_filename = "gebco_2019_n-30.0_s-90.0*.tif"
-    # merged_file = "/home/jen/merged_20200406_2.tif"
+    print("Shapefile list:", shapefile_list)
 
     print('Creating merged tiff file')
     join_tifs(input_gebco_data_dir, input_bathymetry_data_filename, output_merged_tif_filename)
@@ -80,7 +76,7 @@ def process_files(input_cruise_track_data_dir, input_gebco_data_dir, input_bathy
     # shapefile_201701 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-01.shp'
     # shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-02.shp'
     # shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-03.shp'
-
+    #
     # shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
 
     header = ['date_time', 'latitude', 'longitude', 'depth_m']
