@@ -9,6 +9,37 @@
 import rasterstats
 import csv
 from progress_report import ProgressReport
+import argparse
+import os
+import glob
+import rasterio
+
+def get_list_of_shapefiles(input_cruise_track_data_dir):
+    """Get directory of shapefiles and create a list of the files"""
+    # /home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/shapefiles
+
+    filepath = os.path.join(input_cruise_track_data_dir, "*.shp")
+    files = glob.glob(filepath)
+
+    file_list = []
+    for file in files:
+        file_list.append(file)
+
+    print(file_list)
+
+    return file_list
+
+def create_joined_tif(input_bathymetry_data_dir):
+    # https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-mosaic.html
+    for fp in dem_fps:
+        src = rasterio.open(fp)
+        src_files_to_mosaic.append(src)
+
+    mosaic, out_trans = merge(src_files_to_mosaic)
+    out_meta = src.meta.copy()
+
+    with rasterio.open(out_fp, "w", **out_meta) as dest:
+        dest.write(mosaic)
 
 
 def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
@@ -36,15 +67,16 @@ def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
             progress_report.increment_and_print_if_needed()
 
 
-def main():
+def process_files(input_cruise_track_data_dir, raster_joined, csvfile_out):
+    shapefile_list = get_list_of_shapefiles(input_cruise_track_data_dir)
 
     # use one raster file that contains all data
-    raster_joined = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO_2019_12_Nov_2019_356b1e29d3e1/gebco_2019_joined.tif'
-
-    shapefile_201612 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2016-12.shp'
-    shapefile_201701 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-01.shp'
-    shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-02.shp'
-    shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-03.shp'
+    # raster_joined = '/home/jen/projects/ace_data_management/external_data/map_bathymetry/gebco/GEBCO_2019_12_Nov_2019_356b1e29d3e1/gebco_2019_joined.tif'
+    #
+    # shapefile_201612 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2016-12.shp'
+    # shapefile_201701 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-01.shp'
+    # shapefile_201702 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-02.shp'
+    # shapefile_201703 = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_2017-03.shp'
 
     shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
 
@@ -56,4 +88,12 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+
+    parser = argparse.ArgumentParser(description='Get the input files and output required for calculating the depth along the cruise track.')
+    parser.add_argument('input_cruise_track_data_dir', help="Directory containing the input cruise track files, in csv format", type=str)
+    parser.add_argument('input_gebco_data_filename', help="Filename of the input GEBCO data, as a tif", type=str)
+    parser.add_argument('output_filename', help="Filename to output the data into, in csv format", type=str)
+
+    args = parser.parse_args()
+
+    process_files(args.input_cruise_track_data_dir, args.input_gebco_data_filename, args.output_filename)
