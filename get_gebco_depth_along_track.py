@@ -12,7 +12,7 @@ from progress_report import ProgressReport
 import argparse
 import os
 import glob
-import rasterio
+import geojson
 import subprocess
 
 def get_list_of_shapefiles(input_cruise_track_data_dir):
@@ -35,36 +35,57 @@ def join_tifs(file_dir, input_filename, merged_file):
     subprocess.run(['rasterio', 'merge'] + files + [merged_file])
 
 
-def process_list_of_shapefiles(shapefile_list, raster, header, csvfile):
-    """Using a raster input, get values from raster at points in shapefile and output to csvfile"""
+def convert_csv_to_geojson(input_csvfile):
+    """Convert a csv to GeoJSON format features, using the latitude and longitude in the file. Date_time in the csv
+    file is also used as a property in the features that are created."""
 
-    # write to csv file as depth produced
+    with open(input_csvfile) as csvfile:
+        filereader = csv.DictReader(csvfile, delimiter=',', )
+
+        features = []
+
+        for row in filereader:
+            point = geojson.Point((float(row['longitude']), float(row['latitude'])))
+            feature = geojson.Feature(geometry=point, properties={'date_time': row['date_time']})
+            features.append(feature)
+
+        return features
+
+
+def process_geojson_features(geojson_features, raster, header, csvfile):
+    """Using a raster input, get values of a raster at features in geojson.
+    Output the final points and depths to a csv file."""
+
+    # write to csv file as depth found
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(header)
 
-    # provide progress whilst processing: number given is the total number of lines in the shapefiles
+    # provide progress whilst processing: number given is the total number of features in the cruise track
     progress_report = ProgressReport(10_326_939)
 
     # process each of the shapefiles
-    for shapefile in shapefile_list:
-        print('------------- Processing', shapefile, ' -------------')
+    for feature in geojson_features:
 
         # get point values from raster at points in shapefile
-        result = rasterstats.gen_point_query(shapefile, raster, geojson_out=True)
+        result = rasterstats.gen_point_query(feature, raster, geojson_out=True)
 
         # for each value obtained from the raster, output a line into a csvfile
         for r in result:
             csv_writer.writerow(
-                [r['properties']['date_time'], r['properties']['latitude'], r['properties']['longitude'],
+                [r['properties']['date_time'], r.geometry.coordinates[0], r.geometry.coordinates[1],
                  r['properties']['value']])
+
             progress_report.increment_and_print_if_needed()
 
 
-def process_files(input_cruise_track_data_dir, input_gebco_data_dir, input_bathymetry_data_filename, output_merged_tif_filename, output_track_depth_filename):
+def process_files(input_cruise_track_data_dir, input_csvfile, input_gebco_data_dir, input_bathymetry_data_filename, output_merged_tif_filename, output_track_depth_filename):
 
-    print('Creating list of shapefiles')
-    shapefile_list = get_list_of_shapefiles(input_cruise_track_data_dir)
-    print("Shapefile list:", shapefile_list)
+    print("Converting csv file to geojson")
+    geojson_features = convert_csv_to_geojson(input_csvfile)
+
+    # print('Creating list of shapefiles')
+    # shapefile_list = get_list_of_shapefiles(input_cruise_track_data_dir)
+    # print("Shapefile list:", shapefile_list)
 
     print('Creating merged tiff file')
     join_tifs(input_gebco_data_dir, input_bathymetry_data_filename, output_merged_tif_filename)
@@ -80,16 +101,16 @@ def process_files(input_cruise_track_data_dir, input_gebco_data_dir, input_bathy
     # shapefile_list = [shapefile_201612, shapefile_201701, shapefile_201702, shapefile_201703]
 
     header = ['date_time', 'latitude', 'longitude', 'depth_m']
-    # csvfile_out = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth_gebco2019.csv'
 
     with open(output_track_depth_filename, 'w') as csvfile:
-        process_list_of_shapefiles(shapefile_list, output_merged_tif_filename, header, csvfile)
+        process_geojson_features(geojson_features, output_merged_tif_filename, header, csvfile)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Get the input files and output required for calculating the depth along the cruise track.')
     parser.add_argument('input_cruise_track_data_dir', help='Directory containing the input cruise track files, in csv format', type=str)
+    parser.add_argument('input_csvfile', help='Csv file containing the cruise track', type=str)
     parser.add_argument('input_gebco_data_dir', help='Directory to the input GEBCO data, as individual tif files', type=str)
     parser.add_argument('input_bathymetry_data_filename', help='Filepath pattern of tif files eg. basename*.tif', type=str)
     parser.add_argument('output_merged_tif_filename', help='Filename to output the merged tif file into, in tif format', type=str)
@@ -97,5 +118,5 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    process_files(args.input_cruise_track_data_dir, args.input_gebco_data_dir, args.input_bathymetry_data_filename,
-                  args.output_merged_tif_filename, args.output_track_depth_filename)
+    process_files(args.input_cruise_track_data_dir, args.input_csvfile, args.input_gebco_data_dir,
+                  args.input_bathymetry_data_filename, args.output_merged_tif_filename, args.output_track_depth_filename)
