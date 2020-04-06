@@ -40,7 +40,7 @@ def process_cruise_track(track_data_list, netcdf_file, header, csvfile):
     csv_writer = csv.writer(csvfile)
     csv_writer.writerow(header)
 
-    # provide progress whilst processing: number given is the total number of lines in the shapefiles
+    # provide progress whilst processing: number given is the total number of lines in the input cruise track files
     progress_report = ProgressReport(9_499_414)
 
     # process each of the track files
@@ -98,7 +98,7 @@ def process_files(input_netcdf_file, dir_cruise_track_files, cruise_track_filena
 
     with open(output_track_depth_filename, 'w') as csvfile:
         process_cruise_track(track_data_list, input_netcdf_file, header, csvfile)
-        
+
 
 if __name__ == '__main__':
 
@@ -117,4 +117,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    process_files(args.input_netcdf_file, args.dir_cruise_track_files, args.cruise_track_filename_pattern)
+    process_files(args.input_netcdf_file, args.dir_cruise_track_files, args.cruise_track_filename_pattern, args.output_track_depth_filename)
