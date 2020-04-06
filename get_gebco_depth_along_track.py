@@ -61,7 +61,8 @@ def process_geojson_features(geojson_features, raster, header, csvfile):
     csv_writer.writerow(header)
 
     # provide progress whilst processing: number given is the total number of features in the cruise track
-    progress_report = ProgressReport(10_326_939)
+    number_features_to_process = len(geojson_features)
+    progress_report = ProgressReport(number_features_to_process)
 
     # process each of the shapefiles
     for feature in geojson_features:
