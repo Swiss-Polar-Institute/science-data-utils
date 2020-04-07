@@ -4,8 +4,9 @@
 # to Greenland and Antarctic ice sheet topography, cavity geometry, and global bathymetry (RTopo-2.0.4). PANGAEA,
 # https://doi.org/10.1594/PANGAEA.905295
 
-# ACE one-second resolution cruise track: Thomas, Jenny, & Pina Estany, Carles. (2019). Quality-checked, one-second
-# cruise track of the Antarctic Circumnavigation Expedition (ACE) undertaken during the austral summer of 2016/2017.
+# This script was originally created to use the cruise track input data: ACE one-second resolution cruise track: Thomas,
+# Jenny, & Pina Estany, Carles. (2019). Quality-checked, one-second cruise track of the Antarctic Circumnavigation
+# Expedition (ACE) undertaken during the austral summer of 2016/2017.
 # (Version 1.0) [Data set]. Zenodo. http://doi.org/10.5281/zenodo.3260616
 
 import csv

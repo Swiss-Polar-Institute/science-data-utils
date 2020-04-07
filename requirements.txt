@@ -1,3 +1,4 @@
+netCDF4
 geojson
 affine==2.3.0
 agate==1.6.1
