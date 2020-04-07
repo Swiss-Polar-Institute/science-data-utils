@@ -94,7 +94,6 @@ def process_files(input_netcdf_file, dir_cruise_track_files, cruise_track_filena
 
     # output data
     header = ['date_time', 'latitude', 'longitude', 'depth_m']
-    # output_file = '/home/jen/projects/ace_data_management/mapping/data/ace_cruise_track_1sec_with_depth_rtopo2.0.4.csv'
 
     with open(output_track_depth_filename, 'w') as csvfile:
         process_cruise_track(track_data_list, input_netcdf_file, header, csvfile)
@@ -107,13 +106,6 @@ if __name__ == '__main__':
     parser.add_argument('dir_cruise_track_files', help='Directory path to input cruise track csv files', type=str)
     parser.add_argument('cruise_track_filename_pattern', help='Pattern to match cruise track filenames', type=str)
     parser.add_argument('output_track_depth_filename', help='Filename to output the cruise track depth data into, in csv format', type=str)
-
-    # netcdf_file = '/home/jen/projects/ace_data_management/wip/bathymetry_cruise_track/RTopo2/RTopo-2.0.4_30sec_bedrock_topography.nc'
-    # track_data_list = ['/home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/ace_cruise_track_1sec/ace_cruise_track_1sec_2016-12.csv',
-    #                    '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/ace_cruise_track_1sec/ace_cruise_track_1sec_2017-01.csv',
-    #                    '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/ace_cruise_track_1sec/ace_cruise_track_1sec_2017-02.csv',
-    #                    '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/ace_cruise_track_1sec/ace_cruise_track_1sec_2017-03.csv',
-    #                    '/home/jen/projects/ace_data_management/data_to_archive_post_cruise/cruise_track/ace_cruise_track_1sec/ace_cruise_track_1sec_2017-04.csv']
 
     args = parser.parse_args()
 
