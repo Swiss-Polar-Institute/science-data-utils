@@ -37,7 +37,7 @@ def list_files_to_process(dir_cruise_track_files, cruise_track_filename_pattern)
     return file_list
 
 
-def process_cruise_track(track_data_list, netcdf_file, header, csvfile):
+def process_cruise_track(track_data_list, netcdf_file_world, netcdf_file_antarctica, header, csvfile):
     """Process each cruise track file, get the depth from the NetCDF file and output it into a csvfile"""
 
     # write to csv file as depth produced
@@ -51,10 +51,10 @@ def process_cruise_track(track_data_list, netcdf_file, header, csvfile):
     for track_file in track_data_list:
         print('------------- Processing', track_file, ' -------------')
 
-        get_depth_along_track_from_netcdf(netcdf_file, track_file, csv_writer, progress_report)
+        get_depth_along_track_from_netcdf(netcdf_file_world, netcdf_file_antarctica, track_file, csv_writer, progress_report)
 
 
-def get_depth_along_track_from_netcdf(netcdf_file, track_data, csv_writer, progress_report):
+def get_depth_along_track_from_netcdf(netcdf_file_world, netcdf_file_antarctica, track_data, csv_writer, progress_report):
     """For each point get the depth from the NetCDF file and output it in a csv file"""
 
     # get the cruise track points
@@ -62,7 +62,8 @@ def get_depth_along_track_from_netcdf(netcdf_file, track_data, csv_writer, progr
     first = True
 
     # read the netcdf file
-    netcdf_data = Dataset(netcdf_file, mode='r')
+    netcdf_data_world = Dataset(netcdf_file_world, mode='r')
+    netcdf_file_antarctica = Dataset(netcdf_file_antarctica, mode='r')
 
     # for each track point, get the depth from the netcdf file
     for line in csv_file.readlines():
@@ -78,11 +79,11 @@ def get_depth_along_track_from_netcdf(netcdf_file, track_data, csv_writer, progr
 
         # get the indexes of the lat and lon to find the corresponding value of depth in the NetCDF file. This finds
         # the nearest lat and lon as there is unlikely to be the exact values in the NetCDF file. Return the indices.
-        ilat = near(netcdf_data.variables['lat'][:], latitude)
-        ilon = near(netcdf_data.variables['lon'][:], longitude)
+        ilat = near(netcdf_data_world.variables['lat'][:], latitude)
+        ilon = near(netcdf_data_world.variables['lon'][:], longitude)
 
         # get the corresponding depth value and convert it to a float from a numpy masked array
-        depth = float(netcdf_data.variables['bedrock_topography'][ilat, ilon])
+        depth = float(netcdf_data_world.variables['bedrock_topography'][ilat, ilon])
 
         result = [date_time, latitude, longitude, depth]
 
@@ -91,7 +92,7 @@ def get_depth_along_track_from_netcdf(netcdf_file, track_data, csv_writer, progr
         progress_report.increment_and_print_if_needed()
 
 
-def process_files(input_netcdf_file, dir_cruise_track_files, cruise_track_filename_pattern, output_track_depth_filename):
+def process_files(input_netcdf_file_world, input_netcdf_file_antarctica, dir_cruise_track_files, cruise_track_filename_pattern, output_track_depth_filename):
 
     # input cruise track files
     track_data_list = list_files_to_process(dir_cruise_track_files, cruise_track_filename_pattern)
@@ -100,17 +101,19 @@ def process_files(input_netcdf_file, dir_cruise_track_files, cruise_track_filena
     header = ['date_time', 'latitude', 'longitude', 'depth']
 
     with open(output_track_depth_filename, 'w') as csvfile:
-        process_cruise_track(track_data_list, input_netcdf_file, header, csvfile)
+        process_cruise_track(track_data_list, input_netcdf_file_world, input_netcdf_file_antarctica, header, csvfile)
 
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Get the input files and output required for calculating the depth along the cruise track.')
-    parser.add_argument('input_netcdf_file', help='NetCDF file containing RTopo data', type=str)
+    parser.add_argument('input_netcdf_file_world', help='NetCDF file containing RTopo data', type=str)
+    parser.add_argument('input_netcdf_file_antarctica', help='NetCDF file containing Antarctica RTopo data', type=str)
     parser.add_argument('dir_cruise_track_files', help='Directory path to input cruise track csv files', type=str)
     parser.add_argument('cruise_track_filename_pattern', help='Pattern to match cruise track filenames', type=str)
     parser.add_argument('output_track_depth_filename', help='Filename to output the cruise track depth data into, in csv format', type=str)
 
     args = parser.parse_args()
 
-    process_files(args.input_netcdf_file, args.dir_cruise_track_files, args.cruise_track_filename_pattern, args.output_track_depth_filename)
+    process_files(args.input_netcdf_file_world, args.input_netcdf_file_antarctica, args.dir_cruise_track_files,
+                  args.cruise_track_filename_pattern, args.output_track_depth_filename)
