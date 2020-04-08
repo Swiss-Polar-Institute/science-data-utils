@@ -94,7 +94,7 @@ def process_files(input_netcdf_file, dir_cruise_track_files, cruise_track_filena
     track_data_list = list_files_to_process(dir_cruise_track_files, cruise_track_filename_pattern)
 
     # output data
-    header = ['date_time', 'latitude', 'longitude', 'depth_m']
+    header = ['date_time', 'latitude', 'longitude', 'depth']
 
     with open(output_track_depth_filename, 'w') as csvfile:
         process_cruise_track(track_data_list, input_netcdf_file, header, csvfile)
