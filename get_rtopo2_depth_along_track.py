@@ -4,6 +4,8 @@
 # to Greenland and Antarctic ice sheet topography, cavity geometry, and global bathymetry (RTopo-2.0.4). PANGAEA,
 # https://doi.org/10.1594/PANGAEA.905295
 
+# 30 arc-seconds, equivalent horizontal distances: https://www.ngdc.noaa.gov/mgg/topo/report/s6/s6A.html
+
 # This script was originally created to use the cruise track input data: ACE one-second resolution cruise track: Thomas,
 # Jenny, & Pina Estany, Carles. (2019). Quality-checked, one-second cruise track of the Antarctic Circumnavigation
 # Expedition (ACE) undertaken during the austral summer of 2016/2017.
@@ -25,6 +27,7 @@ def near(array, value):
 
 
 def list_files_to_process(dir_cruise_track_files, cruise_track_filename_pattern):
+    """Get the cruise track files to be used from a directory path and filename pattern. Output a list of these."""
 
     filepath = os.path.join(dir_cruise_track_files, cruise_track_filename_pattern)
     file_list = glob.glob(filepath)
@@ -42,7 +45,7 @@ def process_cruise_track(track_data_list, netcdf_file, header, csvfile):
     csv_writer.writerow(header)
 
     # provide progress whilst processing: number given is the total number of lines in the input cruise track files
-    progress_report = ProgressReport(9_499_414)
+    progress_report = ProgressReport(40_321)
 
     # process each of the track files
     for track_file in track_data_list:
