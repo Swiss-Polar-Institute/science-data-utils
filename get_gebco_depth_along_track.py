@@ -91,7 +91,7 @@ def process_files(input_csvfile, input_gebco_data_dir, input_bathymetry_data_fil
     print('Creating merged tiff file')
     join_tifs(input_gebco_data_dir, input_bathymetry_data_filename, output_merged_tif_filename)
 
-    header = ['date_time', 'latitude', 'longitude', 'depth_m']
+    header = ['date_time', 'latitude', 'longitude', 'depth']
 
     with open(output_track_depth_filename, 'w') as csvfile:
         process_geojson_features(geojson_features, output_merged_tif_filename, header, csvfile)
