@@ -63,7 +63,7 @@ def get_depth_along_track_from_netcdf(netcdf_file_world, netcdf_file_antarctica,
 
     # read the netcdf file
     netcdf_data_world = Dataset(netcdf_file_world, mode='r')
-    netcdf_file_antarctica = Dataset(netcdf_file_antarctica, mode='r')
+    netcdf_data_antarctica = Dataset(netcdf_file_antarctica, mode='r')
 
     # for each track point, get the depth from the netcdf file
     for line in csv_file.readlines():
@@ -79,11 +79,16 @@ def get_depth_along_track_from_netcdf(netcdf_file_world, netcdf_file_antarctica,
 
         # get the indexes of the lat and lon to find the corresponding value of depth in the NetCDF file. This finds
         # the nearest lat and lon as there is unlikely to be the exact values in the NetCDF file. Return the indices.
-        ilat = near(netcdf_data_world.variables['lat'][:], latitude)
-        ilon = near(netcdf_data_world.variables['lon'][:], longitude)
-
         # get the corresponding depth value and convert it to a float from a numpy masked array
-        depth = float(netcdf_data_world.variables['bedrock_topography'][ilat, ilon])
+
+        if latitude<-60:
+            ilat = near(netcdf_data_antarctica.variables['lat'][:], latitude)
+            ilon = near(netcdf_data_antarctica.variables['lon'][:], longitude)
+            depth = float(netcdf_data_antarctica.variables['bedrock_topography'][ilat, ilon])
+        else:
+            ilat = near(netcdf_data_world.variables['lat'][:], latitude)
+            ilon = near(netcdf_data_world.variables['lon'][:], longitude)
+            depth = float(netcdf_data_world.variables['bedrock_topography'][ilat, ilon])
 
         result = [date_time, latitude, longitude, depth]
 
