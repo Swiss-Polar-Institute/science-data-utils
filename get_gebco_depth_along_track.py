@@ -77,13 +77,15 @@ def process_geojson_features(geojson_features, raster, header, csvfile):
         # for each value obtained from the raster, output a line into a csvfile
         for r in result:
             csv_writer.writerow(
-                [r['properties']['date_time'], r.geometry.coordinates[0], r.geometry.coordinates[1],
+                [r['properties']['date_time'], r.geometry.coordinates[1], r.geometry.coordinates[0],
                  r['properties']['value']])
 
             progress_report.increment_and_print_if_needed()
 
 
 def process_files(input_csvfile, input_gebco_data_dir, input_bathymetry_data_filename, output_merged_tif_filename, output_track_depth_filename):
+    """Get the inputs from the user to define files that should be used. Use the other functions to get the depth along
+    the cruise track and output the csv file."""
 
     print("Converting csv file to geojson")
     geojson_features = convert_csv_to_geojson(input_csvfile)
