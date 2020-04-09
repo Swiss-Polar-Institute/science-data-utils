@@ -70,7 +70,7 @@ This util finds the depth of the seafloor along a specified track, using RTopo 2
 
 ## Credits
 
-This code has been authored by Carles Pina Estany and Jenny Thomas.
+This code has been authored by Carles Pina Estany and Jen Thomas.
 
 ## License
 
