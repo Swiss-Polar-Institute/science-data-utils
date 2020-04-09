@@ -46,7 +46,7 @@ Uses: an SQLite database that contains timestamped positions
 
 This util finds the depth of the seafloor along a specified track, using GEBCO Bathymetry data.
 
-**Input**: csv file with date and positions, and GEBCO bathymetry data for the required area.
+**Input**: csv file with date and positions, and GEBCO bathymetry data (in GeoTiff format) for the required area.
 
 **Output**: csv file with date, position and sea floor depth.
 
