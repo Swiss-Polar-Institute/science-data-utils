@@ -32,6 +32,8 @@ def convert_isodatetime_in_file(input_file, output_file, date_time_column_header
 
                 isodatetime = row[date_time_column]
                 if isodatetime in missing_values:
+                    row.append(isodatetime)
+                    csv_writer.writerow(row)
                     continue
 
                 try:
