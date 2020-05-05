@@ -5,8 +5,8 @@ def convert_isodatetime_to_timesince_seconds(initial, isodatetime):
     specified, to a time since a specified initial datetime given in the same format. Return the output in seconds."""
 
     # Convert the initial and ISO datetimes to Python datetime formats (rather than strings)
-    initial_dt = datetime.datetime.strptime(initial, '%Y-%m-%dT%H:%M:%S+00:00')
-    isodatetime_dt = datetime.datetime.strptime(isodatetime, '%Y-%m-%d %H:%M:%S+00:00')
+    initial_dt = datetime.datetime.strptime(initial, '%Y-%m-%dT%H:%M:%S%z')
+    isodatetime_dt = datetime.datetime.strptime(isodatetime, '%Y-%m-%dT%H:%M:%S%z')
 
     # Calculate the time difference between the two datetimes
     timedelta = isodatetime_dt - initial_dt
