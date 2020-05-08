@@ -6,7 +6,7 @@ import datetime
 def convert_isodatetime_in_file(input_file, output_file, date_time_column_header):
     """
     Import rows from a file, get the ISO datetime and convert it to a timestamp (secs since start of 1970) for one row,
-     then append it to an output file.
+     then append the time column to an output file.
     """
     missing_values = ['', 'NaN', 'NA', 'NAN']
 
