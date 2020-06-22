@@ -2,18 +2,29 @@ import argparse
 import csv
 
 from datetime_to_position import DatetimeToPosition
+from datetime import datetime
+
+
+def text_to_datetime(dt):
+
+    converted = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
+    reformat_iso = datetime.strftime(converted, "%Y-%m-%dT%H:%M:%S")
+
+    return reformat_iso
 
 
 def process_file(input_date_time_filepath, output_filepath):
     """
     Get datetimes from input CSV file and find corresponding positions which are the output of the DatetimeToPosition
     function. Output them into a CSV file.
-    :param input_date_time_filepath: CSV file containing one column of datetimes in the format YYYY-MM-DDThh:mm:ss,
+    :param input_date_time_filepath: CSV file containing one column of datetimes in the format YYYY-MM-DD hh:mm:ss,
     no header line
     :param output_filepath: CSV file with single-line header containing input datetime and corresponding latitude and
     longitude
     :return: None
     """
+    dt = "2020-05-02 12:23:23"
+    text_to_datetime(dt)
     output_file = open(output_filepath, 'w')
 
     with open(input_date_time_filepath) as csvfile:
@@ -25,10 +36,10 @@ def process_file(input_date_time_filepath, output_filepath):
             print(row[0])
             position = datetime_to_position.datetime_text_to_position(row[0])
             if position is None:
-                output_file.write("{}, {}, {}\n".format(row[0], None, None))
+                output_file.write("{}, {}, {}\n".format(text_to_datetime(row[0]), None, None))
             else:
                 print(position)
-                output_file.write("{}, {}, {}\n".format(row[0], position[0], position[1]))
+                output_file.write("{}, {}, {}\n".format(text_to_datetime(row[0]), position[0], position[1]))
 
     output_file.close()
 

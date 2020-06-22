@@ -22,7 +22,7 @@ class DatetimeToPosition(object):
 
     def datetime_datetime_to_position(self, datetime_datetime):
         """Output datetime in required format."""
-        
+
         return self.datetime_text_to_position(datetime_datetime.strftime("%Y-%m-%dT%H:%M:%S"))
 
     def datetime_text_to_position(self, datetime_text):
