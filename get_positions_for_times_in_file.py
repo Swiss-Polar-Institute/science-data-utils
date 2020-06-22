@@ -6,7 +6,8 @@ from datetime import datetime
 
 
 def text_to_datetime(dt):
-
+    """Convert text date and time to datetime format then put in ISO8601 format."""
+    
     converted = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
     reformat_iso = datetime.strftime(converted, "%Y-%m-%dT%H:%M:%S")
 
@@ -23,8 +24,6 @@ def process_file(input_date_time_filepath, output_filepath):
     longitude
     :return: None
     """
-    dt = "2020-05-02 12:23:23"
-    text_to_datetime(dt)
     output_file = open(output_filepath, 'w')
 
     with open(input_date_time_filepath) as csvfile:
