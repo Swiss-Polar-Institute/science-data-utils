@@ -7,7 +7,7 @@ from datetime import datetime
 
 def text_to_datetime(dt):
     """Convert text date and time to datetime format then put in ISO8601 format."""
-    
+
     converted = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S")
     reformat_iso = datetime.strftime(converted, "%Y-%m-%dT%H:%M:%S")
 
