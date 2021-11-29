@@ -7,6 +7,7 @@ import sys
 
 
 def get_community_records():
+
     response = requests.get(
         'https://zenodo.org/api/records?communities=spi-ace&page=1&size=200&access-token=aNLSrPHSZY0JEjLSdIpflZIjSpvjYzKNVvfPTq7xdhihtvNn0KoII7yt8vEN&all-version=1')
 
@@ -16,14 +17,15 @@ def get_community_records():
 
 
 def read_json_file(json_file):
+
     with open(json_file) as json_file:
         data = json.load(json_file)
-    print(data.keys())
 
     return data
 
 
 def get_conceptdoi_data(data):
+
     conceptdois = []  # list of all ConceptDOIs
     versions = 0  # total number of different DOI versions
     doi_details = []
@@ -35,18 +37,19 @@ def get_conceptdoi_data(data):
 
         doi_details.append((hit['conceptdoi'], hit['metadata']['relations']['version'][0]['count']))
 
-    print("There are", len(conceptdois), "concept DOIs")
-    print("with", versions, "versions")
+    print("\n-------------------\nThere are", len(conceptdois), "concept DOIs with", versions, "versions")
 
     return doi_details
 
 
 def print_line(csv_out, hit, doi):
+
     csv_out.writerow(
         [hit['conceptdoi'], doi, hit['metadata']['relations']['version'][0]['count'], hit['metadata']['title']])
 
 
 def get_multiple_version_dois(data):
+
     csv_file = csv.writer(sys.stdout)
 
     multiple_version_dois = []
@@ -77,3 +80,5 @@ if __name__ == "__main__":
     records = read_json_file(args.json_file)
 
     multiple_version_dois = get_multiple_version_dois(records)
+
+    doi_details = get_conceptdoi_data(records)
