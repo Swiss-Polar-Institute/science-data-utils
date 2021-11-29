@@ -40,22 +40,9 @@ def get_conceptdoi_data(data):
     return doi_details
 
 
-def get_one_version_dois(data):
-
-    one_version_dois = []
-
-    for hit in data['hits']['hits']:
-        if hit['metadata']['relations']['version'][0]['count'] == 1:
-            one_version_dois.append((hit['conceptdoi'], hit['conceptdoi']))
-            print(hit['conceptdoi'], hit['conceptdoi'], hit['metadata']['title'])
-            one_version_dois.append((hit['conceptdoi'], hit['doi']))
-            print(hit['conceptdoi'], hit['doi'], hit['metadata']['title'])
-
-    return one_version_dois
-
-
 def print_line(csv_out, hit, doi):
     csv_out.writerow([hit['conceptdoi'], doi, hit['metadata']['relations']['version'][0]['count'], hit['metadata']['title']])
+
 
 def get_multiple_version_dois(data):
     csv_file = csv.writer(sys.stdout)
@@ -63,21 +50,17 @@ def get_multiple_version_dois(data):
     multiple_version_dois = []
 
     for hit in data['hits']['hits']:
-        if hit['metadata']['relations']['version'][0]['count'] > 1:
-            multiple_version_dois.append((hit['conceptdoi'], hit['conceptdoi']))
-            csv_file.writerow([hit['conceptdoi'], hit['conceptdoi'], hit['metadata']['relations']['version'][0]['count'], hit['metadata']['title']])
-            multiple_version_dois.append((hit['conceptdoi'], hit['doi']))
+        multiple_version_dois.append((hit['conceptdoi'], hit['conceptdoi']))
+        csv_file.writerow([hit['conceptdoi'], hit['conceptdoi'], hit['metadata']['relations']['version'][0]['count'], hit['metadata']['title']])
+        multiple_version_dois.append((hit['conceptdoi'], hit['doi']))
 
-            versions = hit['metadata']['relations']['version'][0]['count']
+        versions = hit['metadata']['relations']['version'][0]['count']
+
+        while versions > 1:
+            print_line(csv_file, hit, '')
             versions -= 1
 
-            while versions >= 0:
-                print_line(csv_file, hit, '')
-                versions -= 1
-
-            print_line(csv_file, hit, hit['doi'])
-
-
+        print_line(csv_file, hit, hit['doi'])
 
     return multiple_version_dois
 
@@ -94,7 +77,6 @@ if __name__== "__main__":
     print(sorted(doi_details, key=lambda t:t[1], reverse=True))
     print("-------------------------------\n\n")
 
-    one_version_dois = get_one_version_dois(records)
     print("-------------------------------\n\n")
 
     multiple_version_dois = get_multiple_version_dois(records)
