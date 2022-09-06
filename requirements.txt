@@ -6,7 +6,7 @@ agate-dbf==0.2.0
 agate-excel==0.2.2
 agate-sql==0.5.3
 attrs==19.3.0
-Babel==2.6.0
+Babel==2.9.1
 backcall==0.1.0
 Click==7.0
 click-plugins==1.1.1
